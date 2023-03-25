@@ -59,4 +59,8 @@ const char* TableValue::getValue() const {
 	return value;
 }
 
+size_t TableValue::getValueLength() const {
+	return myStrlen(getValue());
+}
+
 
