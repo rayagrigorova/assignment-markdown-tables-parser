@@ -56,12 +56,13 @@ size_t TableRow::getNumberOfValues() const {
 	return numberOfValues;
 }
 
-const TableValue& TableRow::getValues() const {
-
+const TableValue* TableRow::getValues() const {
+	return values;
 }
 
 void TableRow::print() const {
 	for (int i = 0; i < numberOfValues; i++) {
-		std::cout << values[i].getValue();
+		std::cout << values[i].getValue() << " ";
 	}
+	std::cout << "\n";
 }

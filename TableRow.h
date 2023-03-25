@@ -20,7 +20,7 @@ public:
 	void setValues(const char** values, size_t count);
 	void setValues(const TableValue* values, size_t count);
 
-	const TableValue& getValues() const;
+	const TableValue* getValues() const;
 	size_t getNumberOfValues() const;
 
 	void print() const;
