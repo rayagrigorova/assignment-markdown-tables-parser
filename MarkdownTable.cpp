@@ -223,7 +223,7 @@ void MarkdownTable::print() const {
 	size_t* columnWidths = calculateColumnWidths();
 
 	for (int i = 0; i < numberOfRows; i++) {
-		rows[i].printValues(alignments, columnWidths);
+		rows[i].printValues(alignments, columnWidths, ' ');
 	}
 
 	delete[] columnWidths;
@@ -235,7 +235,8 @@ void MarkdownTable::selectPrint(const char* value, size_t columnIndex) const {
 	//Print all rows which have a given value on a given column 
 	for (int i = 0; i < numberOfRows; i++) {
 		if (stringsAreEqual(value, rows[i].getValueAtIndex(columnIndex).getValue())) {
-			rows[i].printValues(alignments, columnWidths);
+			char charToWrite = (i == 1) ? HYPHEN : SPACE;
+			rows[i].printValues(alignments, columnWidths, charToWrite);
 		}
 	}
 
@@ -271,12 +272,24 @@ void MarkdownTable::changeValueAtIndex(size_t rowNumber, const char* columnName,
 }
 
 void MarkdownTable::changeValue(const char* oldValue, const char* newValue, const char* columnName) {
+	// First, find the index of the column which corresponds to the columnName
+	int columnInd = -1;
+
 	for (int j = 0; j < numberOfColumns; j++) {
-		for (int i = 0; i < numberOfRows; i++) {
-			if (stringsAreEqual(rows[i].getValueAtIndex(j).getValue(), oldValue)) {
-				rows[i].setValueAtIndex(newValue, j);
-				return;
-			}
+		if (stringsAreEqual(columnName, rows[0].getValueAtIndex(j).getValue())) {
+			columnInd = j;
+			break;
+		}
+	}
+
+	if (columnInd < 0) {
+		return;
+	}
+
+	for (int i = 0; i < numberOfRows; i++) {
+		if (stringsAreEqual(rows[i].getValueAtIndex(columnInd).getValue(), oldValue)) {
+			rows[i].setValueAtIndex(newValue, columnInd);
+			break;
 		}
 	}
 }
@@ -291,7 +304,8 @@ void MarkdownTable::saveToFile(const char* fileName) const {
 
 	for (int i = 0; i < numberOfRows; i++) {
 		for (int j = 0; j < numberOfColumns; j++) {
-			rows[i].writeValuesToStream(file, alignments, columnWidths);
+			char charToWrite = (i == 1) ? HYPHEN : SPACE;
+			rows[i].writeValuesToStream(file, alignments, columnWidths, charToWrite);
 		}
 	}
 
@@ -320,11 +334,9 @@ void MarkdownTable::loadFromFile(const char* fileName) {
 }
 
 // Find the column index of an element on a given row using the element's value
-size_t MarkdownTable::findColumnIndex(const char* value, const size_t rowInd) const{
-	const TableRow& currentRow = rows[rowInd];
-
+int MarkdownTable::findColumnIndex(const char* value, const size_t rowInd) const{
 	for (int j = 0; j < numberOfColumns; j++) {
-		if (stringsAreEqual(currentRow.getValueAtIndex(j).getValue(), value)) {
+		if (stringsAreEqual(rows[rowInd].getValueAtIndex(j).getValue(), value)) {
 			return j;
 		}
 	}
@@ -342,10 +354,10 @@ size_t MarkdownTable::getLongestValueLength(size_t columnIndex) const{
 		return 0;
 	}
 
-	size_t maxLen = myStrlen(this->getRowAtIndex(0).getValueAtIndex(columnIndex).getValue());
+	size_t maxLen = myStrlen(rows[0].getValueAtIndex(columnIndex).getValue());
 
 	for (int i = 1; i < numberOfRows; i++) {
-		size_t temp = myStrlen(getRowAtIndex(i).getValueAtIndex(columnIndex).getValue());
+		size_t temp = myStrlen(rows[i].getValueAtIndex(columnIndex).getValue());
 		if (temp > maxLen) {
 			maxLen = temp;
 		}
@@ -360,10 +372,10 @@ const TableRow& MarkdownTable::getRowAtIndex(size_t index) const{
 
 const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 	// A hyphen is the symbol '-'
-	
-	const char* ptr = rows[1].getValueAtIndex(columnIndex).getValue();
 
-	int foundInd = findSymbolInString(ptr, COLON);
+	const char* str = rows[1].getValueAtIndex(columnIndex).getValue();
+
+	int foundInd = findSymbolInString(str, COLON);
 
 	// No ':' symbols found. Default alignment 
 	if (foundInd == -1) {
@@ -373,13 +385,13 @@ const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 	bool left = false;
 
 	// :---
-	if (foundInd == 0 || ptr[foundInd + 1] == HYPHEN) {
+	if (str[foundInd + 1] == HYPHEN) {
 		left = true;
 	}
 
 	// Search for the next ':' symbol
-	ptr += foundInd;
-	foundInd = findSymbolInString(ptr, COLON);
+	str += foundInd;
+	foundInd = findSymbolInString(str, COLON);
 
 	//No central alignment 
 	if (foundInd == -1) {

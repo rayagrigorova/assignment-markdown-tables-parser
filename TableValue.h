@@ -12,6 +12,7 @@ enum class Alignment {
 const char HYPHEN = '-';
 const char PIPE = '|';
 const char COLON = ':';
+const char SPACE = ' ';
 
 class TableValue {
 private:
@@ -26,6 +27,6 @@ public:
 	const char* getValue() const;
 	size_t getValueLength() const;
 
-	void writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const;
-	void printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const;
+	void writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const;
+	void printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const;
 };

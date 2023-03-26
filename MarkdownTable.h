@@ -14,7 +14,7 @@ private:
 	Alignment alignments[MAX_NUMBER_OF_COLS];
 
 	// A helper function
-	size_t findColumnIndex(const char* value, const size_t rowInd) const;
+	int findColumnIndex(const char* value, const size_t rowInd) const;
 
 	// Using the second row of the table, determine the alignment of all columns 
 	void initAlignments();

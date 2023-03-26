@@ -13,7 +13,7 @@ private:
 public:
 	TableRow();
 	TableRow(const TableValue* values, size_t numberOfValues);
-	TableRow(const char* values, size_t numberOfValues); /* This constructor may be easier to use because it
+	TableRow(const char* values); /* This constructor may be easier to use because it
 													         does't require creating a TableValue array*/
 	~TableRow();
 
@@ -30,6 +30,6 @@ public:
 	const TableValue& getValueAtIndex(size_t index) const;
 
 	void readValuesFromStream(std::ifstream& ifs);
-	void writeValuesToStream(std::ostream& os, const Alignment* alignments, const size_t* widths) const;
-	void printValues(const Alignment* alignments, const size_t* widths) const;
+	void writeValuesToStream(std::ostream& os, const Alignment* alignments, const size_t* widths, char charToWrite) const;
+	void printValues(const Alignment* alignments, const size_t* widths, char charToWrite) const;
 };

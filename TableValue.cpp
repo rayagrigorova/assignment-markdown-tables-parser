@@ -71,37 +71,37 @@ size_t TableValue::getValueLength() const {
 }
 
 // Index is the number of the value's column 
-void TableValue::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
-	//If the value to be printed isn't the rightmost one
-	if (index + 1 != numberOfValues) {
-		os << PIPE << " ";
-	}
+void TableValue::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const {
+	os << ' ' << PIPE << ' ';
 
-	size_t numberOfSpaces = width - getValueLength();
+	size_t length = getValueLength();
+	size_t numberOfChars = width - length;
 
 	//Evenly distribute the spaces on both sides
 	if (alignment == Alignment::center) {
-		numberOfSpaces /= 2;
+		numberOfChars /= 2;
 	}
 
 	if (alignment != Alignment::left) {
-		printSymbolNTimes(os, ' ', numberOfSpaces);
+		printSymbolNTimes(os, charToWrite, numberOfChars);
 	}
 
 	os << getValue();
 
-	if (alignment == Alignment::right) {
-		return;
+	if (alignment == Alignment::left){
+		printSymbolNTimes(os, charToWrite, numberOfChars);
 	}
 
-	printSymbolNTimes(os, ' ', numberOfSpaces);
+	else if (alignment == Alignment::center) {
+		printSymbolNTimes(os, charToWrite, width - length - numberOfChars);
+	}
 
-	//If the value to be printed isn't the leftmost one
-	if (index != 0) {
-		os << PIPE << " ";
+	//If the value to be printed is the last one, add one extra '|'
+	if (index == numberOfValues - 1) {
+		os << " " << PIPE << "\n";
 	}
 }
 
-void TableValue::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
-	writeValueToStream(std::cout, alignment, width, index, numberOfValues);
+void TableValue::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const {
+	writeValueToStream(std::cout, alignment, width, index, numberOfValues, charToWrite);
 }
