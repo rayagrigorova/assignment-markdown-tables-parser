@@ -1,27 +1,30 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "MarkdownTable.h"
 
 MarkdownTable::MarkdownTable() : rows(){
 	numberOfRows = 0;
 	numberOfColumns = 0;
+
+	for (int i = 0; i < numberOfColumns; i++) {
+		alignments[i] = Alignment::left;
+	}
+}
+
+MarkdownTable::MarkdownTable(const TableRow* rows, size_t numberOfRows, size_t numberOfColumns) {
+	setNumberOfRows(numberOfRows);
+	setRows(rows, this->numberOfRows);
 	initAlignments();
 }
 
-MarkdownTable::MarkdownTable(const TableRow& columnNames, const TableRow* rows, size_t numberOfRows, size_t numberOfColumns) {
-	setColumnNames(columnNames);
-	setRows(rows, numberOfRows);
+MarkdownTable::MarkdownTable(const char** rows, size_t numberOfRows, size_t numberOfColumns) {
 	setNumberOfRows(numberOfRows);
+	setRows(rows, this->numberOfRows);
 	initAlignments();
 }
 
-MarkdownTable::MarkdownTable(const char** columnNames, const char** rows, size_t numberOfRows, size_t numberOfColumns) {
-	setColumnNames(columnNames, numberOfRows);
-	setRows(rows, numberOfRows);
-	setNumberOfRows(numberOfRows);
-	initAlignments();
-}
 MarkdownTable::MarkdownTable(const char* fileName) {
 	loadFromFile(fileName);
 }
@@ -43,13 +46,15 @@ const size_t MarkdownTable::getNumberOfColumns() const {
 }
 
 void MarkdownTable::setColumnNames(TableRow columnNames) {
-	//If the number of columns in the table doesn't match the number of 
-	//columns of the given value, return. 
 	size_t numberOfCols = columnNames.getNumberOfValues();
+
+	// If the number of columns in the table doesn't match the number of 
+	// columns of the given value, return. 
 	if (numberOfCols != this->numberOfColumns) {
 		return;
 	}
 
+	// The table row containing the column names is rows[0]
 	for (int i = 0; i < numberOfCols; i++) {
 		this->rows[0].setValueAtIndex(columnNames.getValueAtIndex(i), i);
 	}
@@ -59,23 +64,53 @@ void MarkdownTable::setColumnNames(const char** columnNames, size_t numberOfCols
 	if (numberOfCols != this->numberOfColumns) {
 		return;
 	}
+
 	for (int i = 0; i < numberOfCols; i++) {
 		this->rows[0].setValueAtIndex(columnNames[i], i);
 	}
 }
 
 void MarkdownTable::setRows(const TableRow* rows, size_t numberOfRows) {
-	if (numberOfRows > MAX_NUMBER_OF_ROWS) {
-		return;
-	}
+	setNumberOfRows(numberOfRows);
+	setNumberOfColumns(rows[0].getNumberOfValues());
 
-	for (int i = 0; i < numberOfRows; i++) {
+	for (int i = 0; i < this->numberOfRows; i++) {
 		this->rows[i].setValueAtIndex(rows->getValueAtIndex(i), i);
 	}
 }
 
 void MarkdownTable::setRows(const char** rows, size_t numberOfRows) {
-	///
+	setNumberOfRows(numberOfRows);
+
+	// Each row is a one-dimentional char array. The end of a row is marked by a '\n' symbol and 
+	// the values are seperated by the ' ' symbol. 
+
+	//Assuming the the rows are valid (meaning that they have an equal number of columns)
+	size_t numberOfCols = countCharacterOccurancesInString(rows[0], ' ') + 1;
+	setNumberOfColumns(numberOfCols);
+
+	if (this->numberOfRows == 0 || this->numberOfColumns == 0) {
+		return;
+	}
+
+	const size_t BUFF_SIZE = (MAX_NUMBER_OF_SYMBOLS + 1) * numberOfCols;
+	char* buff = new char[BUFF_SIZE];
+
+	for (int i = 0; i < this->numberOfRows; i++) {
+		std::stringstream ss(rows[i]);
+
+		for (int j = 0; j < this->numberOfColumns - 1; j++) {
+			ss.getline(buff, BUFF_SIZE, ' ');
+			this->rows[i].setValueAtIndex(buff, j);
+		}
+		
+		// Save the last value of the row which isn't seperated by the symbol ' ' 
+		ss.getline(buff, BUFF_SIZE);
+		this->rows[i].setValueAtIndex(buff, this->numberOfRows - 1);
+		
+	}
+
+	delete[] buff;
 }
 
 void MarkdownTable::setNumberOfRows(size_t numberOfRows) {
@@ -131,13 +166,52 @@ namespace {
 
 		return *str1 == *str2;
 	}
+
+	size_t countCharacterOccurancesInFile(std::ifstream& file, char ch) {
+		size_t currentPos = file.tellg();
+
+		char current;
+		size_t ctr = 0;
+
+		while (1) {
+			file.get(current);
+
+			if (file.eof()) {
+				break;
+			}
+
+			if (current == ch) {
+				ctr++;
+			}
+		}
+
+		file.seekg(currentPos);
+		return ctr;
+	}
+
+	size_t countCharacterOccurancesInString(const char* str, char ch) {
+		if (str == nullptr) {
+			return 0;
+		}
+
+		size_t ctr = 0;
+		while (*str) {
+			if (*(str) == ch) {
+				ctr++;
+			}
+			str++;
+		}
+		return ctr;
+	}
 }
 
 size_t* MarkdownTable::calculateColumnWidths() const{
 	size_t* columnWidths = new size_t[numberOfColumns];
+
 	for (int i = 0; i < numberOfColumns; i++) {
 		columnWidths[i] = getLongestValueLength(i);
 	}
+
 	return columnWidths;
 }
 
@@ -158,10 +232,8 @@ void MarkdownTable::selectPrint(const char* value, size_t columnIndex) const {
 
 	//Print all rows which have a given value on a given column 
 	for (int i = 0; i < numberOfRows; i++) {
-		for (int j = 0; j < numberOfColumns; j++) {
-			if (stringsAreEqual(value, rows[i].getValueAtIndex(j).getValue())) {
-				rows[i].printValue(alignments[j], columnWidths[j], j);
-			}
+		if (stringsAreEqual(value, rows[i].getValueAtIndex(columnIndex).getValue())) {
+			rows[i].printValue(alignments[columnIndex], columnWidths[columnIndex], columnIndex);
 		}
 	}
 
@@ -169,7 +241,9 @@ void MarkdownTable::selectPrint(const char* value, size_t columnIndex) const {
 }
 
 void MarkdownTable::changeColumnName(const char* oldName, const char* newName) {
+	// The row containing the column names is rows[0]
 	size_t columnIndex = findColumnIndex(oldName, 0);
+
 	rows[0].setValueAtIndex(newName, columnIndex);
 }
 
@@ -180,13 +254,14 @@ void MarkdownTable::addRow(const TableRow& row) {
 	rows[numberOfRows++] = row;
 }
 
-//void MarkdownTable::addRow(const char** row) {
-//	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
-//		return;
-//	}
-//	TableRow r(row);
-//	rows[numberOfRows++];
-//}
+void MarkdownTable::addRow(const char** row) {
+	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
+		return;
+	}
+	TableRow r;
+	r.setValues(row);
+	rows[numberOfRows++] = r;
+}
 
 void MarkdownTable::changeValueAtIndex(size_t rowNumber, const char* columnName, const char* newValue) {
 	size_t columnIndex = findColumnIndex(columnName, rowNumber);
@@ -229,16 +304,17 @@ void MarkdownTable::loadFromFile(const char* fileName) {
 		return;
 	}
 
-	for (int i = 0; i < numberOfRows; i++) {
-		for (int j = 0; j < numberOfColumns; j++) {
-			rows[i].readValueFromStream(file);
-		}
+	size_t numberOfRows = countCharacterOccurancesInFile(file, '\n') + 1;
+
+	setNumberOfRows(numberOfRows);
+
+	for (size_t i = 0; i < this->numberOfRows; i++) {
+		rows[i].readValuesFromStream(file);
 	}
 
-	size_t* columnWidths = calculateColumnWidths();
+	setNumberOfColumns(rows[0].getNumberOfValues());
 
 	file.close();
-	delete[] columnWidths;
 }
 
 size_t MarkdownTable::findColumnIndex(const char* columnName, const size_t rowInd) const{
@@ -246,18 +322,15 @@ size_t MarkdownTable::findColumnIndex(const char* columnName, const size_t rowIn
 		if (stringsAreEqual(rows[rowInd].getValueAtIndex(j).getValue(), columnName)) {
 			return j;
 		}
-	
 	}
 	return -1;
 }
 
 void MarkdownTable::initAlignments() {
 	for (int i = 0; i < numberOfColumns; i++) {
-		alignments[i] = Alignment::left;
+		alignments[i] = identifyAlignment(i);
 	}
 }
-
-
 
 size_t MarkdownTable::getLongestValueLength(size_t columnIndex) const{
 	if (numberOfRows == 0) {
@@ -265,12 +338,14 @@ size_t MarkdownTable::getLongestValueLength(size_t columnIndex) const{
 	}
 
 	size_t maxLen = myStrlen(this->getRowAtIndex(0).getValueAtIndex(columnIndex).getValue());
+
 	for (int i = 1; i < numberOfRows; i++) {
 		size_t temp = myStrlen(getRowAtIndex(i).getValueAtIndex(columnIndex).getValue());
 		if (temp > maxLen) {
 			maxLen = temp;
 		}
 	}
+
 	return maxLen;
 }
 
@@ -314,4 +389,17 @@ const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 		return Alignment::center;
 	}
 
+}
+
+bool MarkdownTable::rowsAreValid() {
+	size_t numberOfColumnsInFirstRow = rows[0].getNumberOfValues();
+
+	// Compare the number of columns in the first row to all other 
+	for (int i = 1; i < numberOfRows; i++) {
+		if (rows[i].getNumberOfValues() != numberOfColumnsInFirstRow) {
+			return false;
+		}
+	}
+
+	return true;
 }

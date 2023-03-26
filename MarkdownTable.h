@@ -8,28 +8,35 @@ class MarkdownTable {
 private:
 	TableRow rows[MAX_NUMBER_OF_ROWS];
 
-	size_t numberOfRows; 
-	size_t numberOfColumns;
+	// The actual number of rows and columns in the table
+	size_t numberOfRows = 0; 
+	size_t numberOfColumns = 0;
 
-	//Each column has an alignment 
+	// Each column has an alignment 
 	Alignment alignments[MAX_NUMBER_OF_COLS];
 
-	//A helper function
+	// A helper function
 	size_t findColumnIndex(const char* columnName, const size_t rowInd) const;
 
-	//Initialize all alignments to the default value (left)
 	void initAlignments();
 
-	//Needed for printing 
+	// Needed for printing - the longest value in a column 
+	// determines the width of the column. 
 	size_t getLongestValueLength(size_t columnIndex) const; 
 
+	// Find the alignment of a given column (the row containing information about alignment is rows[1])
 	const Alignment identifyAlignment(size_t columnIndex) const;
+
+	// Create an array containg the widths of the table columns
 	size_t* calculateColumnWidths() const;
+
+	// All rows must have the same number of values in them
+	bool rowsAreValid();
 
 public:
 	MarkdownTable();
-	MarkdownTable(const TableRow& columnNames, const TableRow* rows, size_t numberOfRows, size_t numberOfColumns);
-	MarkdownTable(const char** columnNames, const char** rows, size_t numberOfRows, size_t numberOfColumns);
+	MarkdownTable(const TableRow* rows, size_t numberOfRows, size_t numberOfColumns);
+	MarkdownTable(const char** rows, size_t numberOfRows, size_t numberOfColumns);
 	MarkdownTable(const char* fileName);
 
 	~MarkdownTable();

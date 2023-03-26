@@ -45,11 +45,12 @@ namespace {
 	}
 }
 
-//If the given value is nullptr, this->value will not be changed
 void TableValue::setValue(const char* value) {
-	if (myStrlen(value) > MAX_NUMBER_OF_SYMBOLS) {
+	//If the new value is invalid, set this->value to "Unknown"
+	if (myStrlen(value) > MAX_NUMBER_OF_SYMBOLS || value == nullptr) {
 		myStrcpy(this->value, DEFAULT_VAL);
 	}
+
 	else {
 		myStrcpy(this->value, value);
 	}

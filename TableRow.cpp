@@ -17,9 +17,8 @@ TableRow::TableRow(const TableValue* values, size_t numberOfValues) {
 	setValues(values, this->numberOfValues);
 }
 
-TableRow::TableRow(const char** values, size_t numberOfValues) {
-	setNumberOfValues(numberOfValues);
-	setValues(values, this->numberOfValues);
+TableRow::TableRow(const char* values) {
+	setValues(values);
 }
 
 TableRow::~TableRow() {
@@ -33,26 +32,27 @@ void TableRow::setNumberOfValues(size_t numberOfValues) {
 	this->numberOfValues = numberOfValues;
 }
 
-void TableRow::setValues(const char* values, size_t count) {
-	if (count > MAX_NUMBER_OF_COLS) {
-		return;
-	}
+void TableRow::setValues(const char* values) {
+	// Each value in a row is seperated by a ' ' character
+	size_t count = countCharacterOccurances(values, ' ') + 1;
+	setNumberOfValues(count);
 
 	std::stringstream ss(values);
-	// Skip the first pipe symbol
-	ss.get();
 
-	char buff[(MAX_NUMBER_OF_SYMBOLS + 1) * MAX_NUMBER_OF_COLS];
-	for (int i = 0; i < count; i++) {
-		ss.getline(buff, MAX_NUMBER_OF_SYMBOLS, PIPE);
+	// Skip the first pipe symbol if there is such
+	if ((char)ss.peek() == PIPE) {
+		ss.get();
+	}
+
+	for (int i = 0; i < this->numberOfValues; i++) {
+		char buff[MAX_NUMBER_OF_SYMBOLS + 1];
+		ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
 		this->values[i].setValue(buff);
 	}
 }
 
 void TableRow::setValues(const TableValue* values, size_t count) {
-	if (count > MAX_NUMBER_OF_COLS) {
-		return;
-	}
+	setNumberOfValues(count);
 
 	for (int i = 0; i < this->numberOfValues; i++) {
 		this->values[i].setValue(values[i].getValue());
@@ -88,7 +88,6 @@ void TableRow::setValueAtIndex(const char* value, size_t index) {
 	values[index].setValue(value);
 }
 
-
 const TableValue& TableRow::getValueAtIndex(size_t index) const{
 	if (index > numberOfValues) {
 		return nullptr;
@@ -103,7 +102,7 @@ namespace {
 		}
 	}
 
-	size_t countCharacterOccurance(const char* str, char ch) {
+	size_t countCharacterOccurances(const char* str, char ch) {
 		if (str == nullptr) {
 			return 0;
 		}
@@ -117,8 +116,33 @@ namespace {
 		}
 		return ctr;
 	}
+
+	size_t countCharacterOccurancesInFileLine(std::ifstream& file, char ch) {
+		size_t currentPos = file.tellg();
+
+		char current = '\0';
+		size_t ctr = 0;
+
+		while (1 && current != '\n') {
+			file.get(current);
+
+			if (file.eof()) {
+				break;
+			}
+
+			if (current == ch) {
+				ctr++;
+			}
+		}
+
+		file.seekg(currentPos);
+		return ctr;
+	}
 }
 
+// Width refers to the width of a column a value is in.
+// The widt of the column is determined by the longest value in it.
+// The class MarkdownTable takes care of the widths. 
 void TableRow::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index) const{
 	//If the value to be printed isn't the rightmost one
 	if (index + 1 != numberOfValues) {
@@ -127,6 +151,7 @@ void TableRow::writeValueToStream(std::ostream& os, const Alignment& alignment, 
 
 	size_t numberOfSpaces = width - getValueAtIndex(index).getValueLength();
 
+	//Evenly distribute the spaces on both sides
 	if (alignment == Alignment::center) {
 		numberOfSpaces /= 2;
 	}
@@ -149,14 +174,27 @@ void TableRow::writeValueToStream(std::ostream& os, const Alignment& alignment, 
 	}
 }
 
+void TableRow::readValuesFromStream(std::ifstream& ifs){
+	// Each line in the file is one row in the table
+	size_t numberOfValuesInLine = countCharacterOccurancesInFileLine(ifs, PIPE) - 1;
 
-void TableRow::readValueFromStream(std::ifstream& ifs){
-	// Each of the values contains a maximum of 20 symbols + '\0'
-	const size_t BUFF_SIZE = (MAX_NUMBER_OF_SYMBOLS + 1) * MAX_NUMBER_OF_COLS;
-	char buff[BUFF_SIZE];
-	ifs.getline(buff, BUFF_SIZE);
+	//Skip the first '|' symbol of the file
+	ifs.get();
 
-	setValues(buff, countCharacterOccurance(buff, PIPE) - 1);	
+	char buff[MAX_NUMBER_OF_SYMBOLS + 1];
+	for (int i = 0; !ifs.eof() && i < numberOfValuesInLine; i++) {
+		//Get all symbols up to '|'
+		ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
+
+		values[i].setValue(buff);
+	}
+	
+	//If the end of the file hasn't been reached, go to the next line 
+	//so that the next row can be read
+	if (!ifs.eof()) {
+		ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, '\n');
+	}
+
 }
 
 void TableRow::printValue(const Alignment& alignment, size_t width, size_t index) const {
