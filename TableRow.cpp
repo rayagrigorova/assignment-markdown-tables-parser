@@ -60,6 +60,7 @@ namespace {
 			}
 		}
 
+		file.clear();
 		file.seekg(currentPos);
 		return ctr;
 	}
@@ -135,8 +136,10 @@ void TableRow::readValuesFromStream(std::ifstream& ifs){
 	if (!ifs.is_open()) {
 		return;
 	}
+
 	// Each line in the file is one row in the table
 	size_t numberOfValuesInLine = countCharacterOccurancesInFileLine(ifs, PIPE) - 1;
+
 	setNumberOfValues(numberOfValuesInLine);
 
 	char buff[MAX_NUMBER_OF_SYMBOLS + 1];

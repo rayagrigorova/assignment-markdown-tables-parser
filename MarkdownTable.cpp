@@ -168,7 +168,7 @@ namespace {
 		// Save position
 		size_t currentPos = file.tellg();
 		// Move the get pointer to the beginning of the file
-		file.seekg(0);
+		file.seekg(0, std::ios::beg);
 
 		char current;
 		size_t ctr = 0;
@@ -185,11 +185,8 @@ namespace {
 			}
 		}
 
-		// Restore position 
-		file.seekg(currentPos);
-		// Clear the eof flag
 		file.clear();
-
+		file.seekg(currentPos, std::ios::beg);
 		return ctr;
 	}
 
