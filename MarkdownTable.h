@@ -14,7 +14,7 @@ private:
 	Alignment alignments[MAX_NUMBER_OF_COLS];
 
 	// A helper function
-	size_t findColumnIndex(const char* columnName, const size_t rowInd) const;
+	size_t findColumnIndex(const char* value, const size_t rowInd) const;
 
 	// Using the second row of the table, determine the alignment of all columns 
 	void initAlignments();
@@ -32,8 +32,8 @@ private:
 
 public:
 	MarkdownTable();
-	MarkdownTable(const TableRow* rows, size_t numberOfRows, size_t numberOfColumns);
-	MarkdownTable(const char** rows, size_t numberOfRows, size_t numberOfColumns);
+	MarkdownTable(const TableRow* rows, size_t numberOfRows);
+	MarkdownTable(const char** rows, size_t numberOfRows);
 	MarkdownTable(const char* fileName);
 
 	~MarkdownTable();
@@ -45,7 +45,7 @@ public:
 
 	// Set the first row of the table
 	void setColumnNames(TableRow columnNames);
-	void setColumnNames(const char** columnNames, size_t numberOfCols);
+	void setColumnNames(const char* columnNames);
 
 	void setRows(const TableRow* rows, size_t numberOfRows);
 	void setRows(const char** rows, size_t numberOfRows);

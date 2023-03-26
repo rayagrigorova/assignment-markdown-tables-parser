@@ -13,16 +13,19 @@ const char HYPHEN = '-';
 const char PIPE = '|';
 const char COLON = ':';
 
-class TableValue {
+class TableElement {
 private:
 	char value[MAX_NUMBER_OF_SYMBOLS + 1];
 public:
-	TableValue();
-	TableValue(const char* value);
+	TableElement();
+	TableElement(const char* value);
 
-	~TableValue();
+	~TableElement();
 
 	void setValue(const char* value);
 	const char* getValue() const;
 	size_t getValueLength() const;
+
+	void writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const;
+	void printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const;
 };

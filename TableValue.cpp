@@ -2,15 +2,15 @@
 
 #include "TableValue.h"
 
-TableValue::TableValue() : TableValue(DEFAULT_VAL) {
+TableElement::TableElement() : TableElement(DEFAULT_VAL) {
 
 }
 
-TableValue::TableValue(const char* value) {
+TableElement::TableElement(const char* value) {
 	setValue(value);
 }
 
-TableValue::~TableValue() {
+TableElement::~TableElement() {
 
 }
 
@@ -43,9 +43,15 @@ namespace {
 		}
 		*(dest) = '\0';
 	}
+
+	void printSymbolNTimes(std::ostream& os, const char symbol, const int N) {
+		for (int i = 0; i < N; i++) {
+			os << symbol;
+		}
+	}
 }
 
-void TableValue::setValue(const char* value) {
+void TableElement::setValue(const char* value) {
 	//If the new value is invalid, set this->value to "Unknown"
 	if (myStrlen(value) > MAX_NUMBER_OF_SYMBOLS || value == nullptr) {
 		myStrcpy(this->value, DEFAULT_VAL);
@@ -56,12 +62,46 @@ void TableValue::setValue(const char* value) {
 	}
 }
 
-const char* TableValue::getValue() const {
+const char* TableElement::getValue() const {
 	return value;
 }
 
-size_t TableValue::getValueLength() const {
+size_t TableElement::getValueLength() const {
 	return myStrlen(getValue());
 }
 
+// Index is the number of the value's column 
+void TableElement::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
+	//If the value to be printed isn't the rightmost one
+	if (index + 1 != numberOfValues) {
+		os << PIPE << " ";
+	}
 
+	size_t numberOfSpaces = width - getValueLength();
+
+	//Evenly distribute the spaces on both sides
+	if (alignment == Alignment::center) {
+		numberOfSpaces /= 2;
+	}
+
+	if (alignment != Alignment::left) {
+		printSymbolNTimes(os, ' ', numberOfSpaces);
+	}
+
+	os << getValue();
+
+	if (alignment == Alignment::right) {
+		return;
+	}
+
+	printSymbolNTimes(os, ' ', numberOfSpaces);
+
+	//If the value to be printed isn't the leftmost one
+	if (index != 0) {
+		os << PIPE << " ";
+	}
+}
+
+void TableElement::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
+	writeValueToStream(std::cout, alignment, width, index, numberOfValues);
+}
