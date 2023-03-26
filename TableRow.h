@@ -13,14 +13,13 @@ private:
 public:
 	TableRow();
 	TableRow(const TableValue* values, size_t numberOfValues);
-	TableRow(const char* values); /* This constructor may be easier to use because it
+	TableRow(const char* values, size_t numberOfValues); /* This constructor may be easier to use because it
 													         does't require creating a TableValue array*/
-
 	~TableRow();
 
 	void setNumberOfValues(size_t numberOfValues);
 	void setValues(const TableValue* values, size_t count);
-	void setValues(const char* values);
+	void setValues(const char* values, size_t numberOfValues);
 
 	void setValueAtIndex(const TableValue& value, size_t index);
 	void setValueAtIndex(const char* value, size_t index);

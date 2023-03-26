@@ -17,8 +17,8 @@ TableRow::TableRow(const TableValue* values, size_t numberOfValues) {
 	setValues(values, this->numberOfValues);
 }
 
-TableRow::TableRow(const char* values) {
-	setValues(values);
+TableRow::TableRow(const char** values, size_t numberOfValues) {
+	setValues(values, numberOfValues);
 }
 
 TableRow::~TableRow() {
@@ -32,29 +32,19 @@ void TableRow::setNumberOfValues(size_t numberOfValues) {
 	this->numberOfValues = numberOfValues;
 }
 
-void TableRow::setValues(const char* values) {
-	// Each value in a row is seperated by a ' ' character
-	size_t count = countCharacterOccurances(values, ' ') + 1;
-	setNumberOfValues(count);
+void TableRow::setValues(const char** values, size_t numberOfValues) {
+	setNumberOfValues(numberOfValues);
 
-	char buff[(MAX_NUMBER_OF_SYMBOLS + 1) * MAX_NUMBER_OF_COLS];
-	std::stringstream ss(values);
-
-	for (int i = 0; i < this->numberOfValues - 1; i++) {
-		ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, ' ');
-		this->values[i].setValue(buff);
+	for (int i = 0; i < this->numberOfValues; i++) {
+		setValueAtIndex(values[i], i);
 	}
-
-	// There isn't a ' ' symbol after thee last value 
-	ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1);
-	this->values[numberOfValues - 1].setValue(buff);
 }
 
 void TableRow::setValues(const TableValue* values, size_t count) {
 	setNumberOfValues(count);
 
 	for (int i = 0; i < this->numberOfValues; i++) {
-		this->values[i].setValue(values[i].getValue());
+		setValueAtIndex(values[i], i);
 	}
 }
 
@@ -65,13 +55,6 @@ size_t TableRow::getNumberOfValues() const {
 const TableValue* TableRow::getValues() const {
 	return values;
 }
-
-//void TableRow::print() const {
-//	for (int i = 0; i < numberOfValues; i++) {
-//		std::cout << values[i].getValue() << " ";
-//	}
-//	std::cout << "\n";
-//}
 
 void TableRow::setValueAtIndex(const TableValue& value, size_t index) {
 	if (index >= numberOfValues) {
