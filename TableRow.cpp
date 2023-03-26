@@ -12,7 +12,7 @@ TableRow::TableRow(){
 	}
 }
 
-TableRow::TableRow(const TableElement* values, size_t numberOfValues) {
+TableRow::TableRow(const TableValue* values, size_t numberOfValues) {
 	setNumberOfValues(numberOfValues);
 	setValues(values, this->numberOfValues);
 }
@@ -88,7 +88,7 @@ void TableRow::setValues(const char* values) {
 	this->values[numberOfValues - 1].setValue(buff);
 }
 
-void TableRow::setValues(const TableElement* values, size_t count) {
+void TableRow::setValues(const TableValue* values, size_t count) {
 	setNumberOfValues(count);
 
 	for (int i = 0; i < this->numberOfValues; i++) {
@@ -100,11 +100,11 @@ size_t TableRow::getNumberOfValues() const {
 	return numberOfValues;
 }
 
-const TableElement* TableRow::getValues() const {
+const TableValue* TableRow::getValues() const {
 	return values;
 }
 
-void TableRow::setValueAtIndex(const TableElement& value, size_t index) {
+void TableRow::setValueAtIndex(const TableValue& value, size_t index) {
 	if (index >= numberOfValues) {
 		return;
 	}
@@ -118,7 +118,7 @@ void TableRow::setValueAtIndex(const char* value, size_t index) {
 	values[index].setValue(value);
 }
 
-const TableElement& TableRow::getValueAtIndex(size_t index) const{
+const TableValue& TableRow::getValueAtIndex(size_t index) const{
 	if (index >= numberOfValues) {
 		return nullptr;
 	}

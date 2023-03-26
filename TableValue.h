@@ -13,14 +13,14 @@ const char HYPHEN = '-';
 const char PIPE = '|';
 const char COLON = ':';
 
-class TableElement {
+class TableValue {
 private:
 	char value[MAX_NUMBER_OF_SYMBOLS + 1];
 public:
-	TableElement();
-	TableElement(const char* value);
+	TableValue();
+	TableValue(const char* value);
 
-	~TableElement();
+	~TableValue();
 
 	void setValue(const char* value);
 	const char* getValue() const;

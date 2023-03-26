@@ -2,15 +2,15 @@
 
 #include "TableValue.h"
 
-TableElement::TableElement() : TableElement(DEFAULT_VAL) {
+TableValue::TableValue() : TableValue(DEFAULT_VAL) {
 
 }
 
-TableElement::TableElement(const char* value) {
+TableValue::TableValue(const char* value) {
 	setValue(value);
 }
 
-TableElement::~TableElement() {
+TableValue::~TableValue() {
 
 }
 
@@ -51,7 +51,7 @@ namespace {
 	}
 }
 
-void TableElement::setValue(const char* value) {
+void TableValue::setValue(const char* value) {
 	//If the new value is invalid, set this->value to "Unknown"
 	if (myStrlen(value) > MAX_NUMBER_OF_SYMBOLS || value == nullptr) {
 		myStrcpy(this->value, DEFAULT_VAL);
@@ -62,16 +62,16 @@ void TableElement::setValue(const char* value) {
 	}
 }
 
-const char* TableElement::getValue() const {
+const char* TableValue::getValue() const {
 	return value;
 }
 
-size_t TableElement::getValueLength() const {
+size_t TableValue::getValueLength() const {
 	return myStrlen(getValue());
 }
 
 // Index is the number of the value's column 
-void TableElement::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
+void TableValue::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
 	//If the value to be printed isn't the rightmost one
 	if (index + 1 != numberOfValues) {
 		os << PIPE << " ";
@@ -102,6 +102,6 @@ void TableElement::writeValueToStream(std::ostream& os, const Alignment& alignme
 	}
 }
 
-void TableElement::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
+void TableValue::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues) const {
 	writeValueToStream(std::cout, alignment, width, index, numberOfValues);
 }
