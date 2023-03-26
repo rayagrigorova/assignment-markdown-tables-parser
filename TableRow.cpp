@@ -37,18 +37,17 @@ void TableRow::setValues(const char* values) {
 	size_t count = countCharacterOccurances(values, ' ') + 1;
 	setNumberOfValues(count);
 
+	char buff[(MAX_NUMBER_OF_SYMBOLS + 1) * MAX_NUMBER_OF_COLS];
 	std::stringstream ss(values);
 
-	// Skip the first pipe symbol if there is such
-	if ((char)ss.peek() == PIPE) {
-		ss.get();
-	}
-
-	for (int i = 0; i < this->numberOfValues; i++) {
-		char buff[MAX_NUMBER_OF_SYMBOLS + 1];
-		ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
+	for (int i = 0; i < this->numberOfValues - 1; i++) {
+		ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, ' ');
 		this->values[i].setValue(buff);
 	}
+
+	// There isn't a ' ' symbol after thee last value 
+	ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1);
+	this->values[numberOfValues - 1].setValue(buff);
 }
 
 void TableRow::setValues(const TableValue* values, size_t count) {
@@ -75,21 +74,21 @@ const TableValue* TableRow::getValues() const {
 //}
 
 void TableRow::setValueAtIndex(const TableValue& value, size_t index) {
-	if (index > numberOfValues) {
+	if (index >= numberOfValues) {
 		return;
 	}
 	values[index].setValue(value.getValue());
 }
 
 void TableRow::setValueAtIndex(const char* value, size_t index) {
-	if (index > numberOfValues) {
+	if (index >= numberOfValues) {
 		return;
 	}
 	values[index].setValue(value);
 }
 
 const TableValue& TableRow::getValueAtIndex(size_t index) const{
-	if (index > numberOfValues) {
+	if (index >= numberOfValues) {
 		return nullptr;
 	}
 	return values[index];
@@ -123,7 +122,7 @@ namespace {
 		char current = '\0';
 		size_t ctr = 0;
 
-		while (1 && current != '\n') {
+		while (current != '\n') {
 			file.get(current);
 
 			if (file.eof()) {
@@ -140,9 +139,11 @@ namespace {
 	}
 }
 
-// Width refers to the width of a column a value is in.
-// The widt of the column is determined by the longest value in it.
+// Width refers to the width of a column a value is in. 
+// The width of the column is determined by the longest value in it.
 // The class MarkdownTable takes care of the widths. 
+
+// Index is the number of the value's column 
 void TableRow::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index) const{
 	//If the value to be printed isn't the rightmost one
 	if (index + 1 != numberOfValues) {

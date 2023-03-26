@@ -14,15 +14,30 @@ MarkdownTable::MarkdownTable() : rows(){
 }
 
 MarkdownTable::MarkdownTable(const TableRow* rows, size_t numberOfRows, size_t numberOfColumns) {
+	if (!rowsAreValid(rows, numberOfRows)) {
+		return;
+	}
 	setNumberOfRows(numberOfRows);
 	setRows(rows, this->numberOfRows);
+	setNumberOfColumns(numberOfColumns);
 	initAlignments();
+
 }
 
 MarkdownTable::MarkdownTable(const char** rows, size_t numberOfRows, size_t numberOfColumns) {
-	setNumberOfRows(numberOfRows);
-	setRows(rows, this->numberOfRows);
-	initAlignments();
+	//// Create rows from the 2D char array and use the other parametarized constructor
+	//TableRow* arr = new TableRow[numberOfRows];
+	//for (int i = 0; i < numberOfRows; i++) {
+	//	arr[i] = TableRow(rows[i]);
+	//}
+
+	//if (!rowsAreValid(arr, numberOfRows)) {
+	//	return;
+	//}
+
+	MarkdownTable(arr, numberOfRows, numberOfColumns);
+
+	delete[] arr;
 }
 
 MarkdownTable::MarkdownTable(const char* fileName) {
@@ -71,15 +86,28 @@ void MarkdownTable::setColumnNames(const char** columnNames, size_t numberOfCols
 }
 
 void MarkdownTable::setRows(const TableRow* rows, size_t numberOfRows) {
+	if (!rowsAreValid(rows, numberOfRows)) {
+		return;
+	}
+
 	setNumberOfRows(numberOfRows);
 	setNumberOfColumns(rows[0].getNumberOfValues());
 
 	for (int i = 0; i < this->numberOfRows; i++) {
-		this->rows[i].setValueAtIndex(rows->getValueAtIndex(i), i);
+		this->rows[i].setValues(rows[i].getValues(), this->numberOfColumns);
 	}
 }
 
 void MarkdownTable::setRows(const char** rows, size_t numberOfRows) {
+	TableRow* arr = new TableRow[numberOfRows];
+	for (int i = 0; i < numberOfRows; i++) {
+		arr[i] = TableRow(rows[i]);
+	}
+
+	if (!rowsAreValid(arr, numberOfRows)) {
+		return;
+	}
+
 	setNumberOfRows(numberOfRows);
 
 	// Each row is a one-dimentional char array. The end of a row is marked by a '\n' symbol and 
@@ -116,6 +144,12 @@ void MarkdownTable::setRows(const char** rows, size_t numberOfRows) {
 void MarkdownTable::setNumberOfRows(size_t numberOfRows) {
 	if (numberOfRows <= MAX_NUMBER_OF_ROWS) {
 		this->numberOfRows = numberOfRows;
+	}
+}
+
+void MarkdownTable::setNumberOfColumns(size_t numberOfColumns) {
+	if (numberOfColumns <= MAX_NUMBER_OF_COLS) {
+		this->numberOfColumns = numberOfColumns;
 	}
 }
 
@@ -254,7 +288,7 @@ void MarkdownTable::addRow(const TableRow& row) {
 	rows[numberOfRows++] = row;
 }
 
-void MarkdownTable::addRow(const char** row) {
+void MarkdownTable::addRow(const char* row) {
 	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
 		return;
 	}
@@ -391,7 +425,7 @@ const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 
 }
 
-bool MarkdownTable::rowsAreValid() {
+bool rowsAreValid(const TableRow* rows, size_t numberOfRows) {
 	size_t numberOfColumnsInFirstRow = rows[0].getNumberOfValues();
 
 	// Compare the number of columns in the first row to all other 
