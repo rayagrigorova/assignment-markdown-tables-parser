@@ -44,13 +44,13 @@ const size_t MarkdownTable::getNumberOfColumns() const {
 void MarkdownTable::setColumnNames(TableRow columnNames) {
 	// If the number of columns in the table doesn't match the number of 
 	// columns of the given value, return. 
-	if (columnNames.getNumberOfValues() != this->numberOfColumns) {
+	if (columnNames.getNumberOfCells() != this->numberOfColumns) {
 		return;
 	}
 
 	// The table row containing the column names is rows[0]
 	for (int i = 0; i < this->numberOfColumns; i++) {
-		this->rows[0].setValueAtIndex(columnNames.getValueAtIndex(i), i);
+		this->rows[0].setCellAtIndex(columnNames.getCellAtIndex(i), i);
 	}
 }
 
@@ -58,12 +58,12 @@ void MarkdownTable::setColumnNames(const char* columnNames) {
 	// Create new row from the column names 
 	TableRow r(columnNames);
 
-	if (r.getNumberOfValues() != this->numberOfColumns) {
+	if (r.getNumberOfCells() != this->numberOfColumns) {
 		return;
 	}
 
 	for (int i = 0; i < this->numberOfColumns; i++) {
-		this->rows[0].setValueAtIndex(r.getValueAtIndex(i), i);
+		this->rows[0].setCellAtIndex(r.getCellAtIndex(i), i);
 	}
 }
 
@@ -73,10 +73,10 @@ void MarkdownTable::setRows(const TableRow* rows, size_t numberOfRows) {
 	}
 
 	setNumberOfRows(numberOfRows);
-	setNumberOfColumns(rows[0].getNumberOfValues());
+	setNumberOfColumns(rows[0].getNumberOfCells());
 
 	for (int i = 0; i < this->numberOfRows; i++) {
-		this->rows[i].setValues(rows[i].getValues(), this->numberOfColumns);
+		this->rows[i].setCells(rows[i].getCells(), this->numberOfColumns);
 	}
 
 	initAlignments();
@@ -94,10 +94,10 @@ void MarkdownTable::setRows(const char** rows, size_t numberOfRows) {
 	}
 
 	setNumberOfRows(numberOfRows);
-	setNumberOfColumns(arr[0].getNumberOfValues());
+	setNumberOfColumns(arr[0].getNumberOfCells());
 
 	for (int i = 0; i < numberOfRows; i++) {
-		this->rows[i].setValues(arr[i].getValues(), this->numberOfColumns);
+		this->rows[i].setCells(arr[i].getCells(), this->numberOfColumns);
 	}
 
 	initAlignments();
@@ -220,20 +220,21 @@ void MarkdownTable::print() const {
 	size_t* columnWidths = calculateColumnWidths();
 
 	for (int i = 0; i < numberOfRows; i++) {
-		rows[i].printValues(alignments, columnWidths, ' ');
+		rows[i].printCells(alignments, columnWidths, ' ');
 	}
 
 	delete[] columnWidths;
 }
 
-void MarkdownTable::selectPrint(const char* value, size_t columnIndex) const {
+void MarkdownTable::selectPrint(const char* value, const char* columnName) const {
 	size_t* columnWidths = calculateColumnWidths();
+	size_t columnIndex = findColumnIndex(columnName, 0);
 
 	//Print all rows which have a given value on a given column 
 	for (int i = 0; i < numberOfRows; i++) {
-		if (stringsAreEqual(value, rows[i].getValueAtIndex(columnIndex).getValue())) {
+		if (stringsAreEqual(value, rows[i].getCellAtIndex(columnIndex).getValue())) {
 			char charToWrite = (i == 1) ? HYPHEN : SPACE;
-			rows[i].printValues(alignments, columnWidths, charToWrite);
+			rows[i].printCells(alignments, columnWidths, charToWrite);
 		}
 	}
 
@@ -244,7 +245,7 @@ void MarkdownTable::changeColumnName(const char* oldName, const char* newName) {
 	// The row containing the column names is rows[0]
 	size_t columnIndex = findColumnIndex(oldName, 0);
 
-	rows[0].setValueAtIndex(newName, columnIndex);
+	rows[0].setCellAtIndex(newName, columnIndex);
 }
 
 void MarkdownTable::addRow(const TableRow& row) {
@@ -258,22 +259,28 @@ void MarkdownTable::addRow(const char* row) {
 	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
 		return;
 	}
+
 	TableRow r(row);
-	rows[numberOfRows++] = r;
+	if (r.getNumberOfCells() == numberOfColumns) {
+		rows[numberOfRows++] = r;
+	}
 }
 
-void MarkdownTable::changeValueAtIndex(size_t rowNumber, const char* columnName, const char* newValue) {
+void MarkdownTable::changeCellAtIndex(size_t rowNumber, const char* columnName, const char* newValue) {
+	// The row numbering starts from 1
+	rowNumber--;
+
 	size_t columnIndex = findColumnIndex(columnName, rowNumber);
 
-	rows[rowNumber].setValueAtIndex(newValue, columnIndex);
+	rows[rowNumber].setCellAtIndex(newValue, columnIndex);
 }
 
-void MarkdownTable::changeValue(const char* oldValue, const char* newValue, const char* columnName) {
+void MarkdownTable::changeCell(const char* oldValue, const char* newValue, const char* columnName) {
 	// First, find the index of the column which corresponds to the columnName
 	int columnInd = -1;
 
 	for (int j = 0; j < numberOfColumns; j++) {
-		if (stringsAreEqual(columnName, rows[0].getValueAtIndex(j).getValue())) {
+		if (stringsAreEqual(columnName, rows[0].getCellAtIndex(j).getValue())) {
 			columnInd = j;
 			break;
 		}
@@ -284,8 +291,8 @@ void MarkdownTable::changeValue(const char* oldValue, const char* newValue, cons
 	}
 
 	for (int i = 0; i < numberOfRows; i++) {
-		if (stringsAreEqual(rows[i].getValueAtIndex(columnInd).getValue(), oldValue)) {
-			rows[i].setValueAtIndex(newValue, columnInd);
+		if (stringsAreEqual(rows[i].getCellAtIndex(columnInd).getValue(), oldValue)) {
+			rows[i].setCellAtIndex(newValue, columnInd);
 			break;
 		}
 	}
@@ -302,7 +309,7 @@ void MarkdownTable::saveToFile(const char* fileName) const {
 	for (int i = 0; i < numberOfRows; i++) {
 		for (int j = 0; j < numberOfColumns; j++) {
 			char charToWrite = (i == 1) ? HYPHEN : SPACE;
-			rows[i].writeValuesToStream(file, alignments, columnWidths, charToWrite);
+			rows[i].writeCellsToStream(file, alignments, columnWidths, charToWrite);
 		}
 	}
 
@@ -322,18 +329,19 @@ void MarkdownTable::loadFromFile(const char* fileName) {
 	setNumberOfRows(numberOfRows);
 
 	for (size_t i = 0; i < this->numberOfRows; i++) {
-		rows[i].readValuesFromStream(file);
+		rows[i].readCellsFromStream(file);
 	}
 
-	setNumberOfColumns(rows[0].getNumberOfValues());
+	setNumberOfColumns(rows[0].getNumberOfCells());
 
+	initAlignments();
 	file.close();
 }
 
-// Find the column index of an element on a given row using the element's value
+// Find the column index of a cell on a given row using the cell's value
 int MarkdownTable::findColumnIndex(const char* value, const size_t rowInd) const{
 	for (int j = 0; j < numberOfColumns; j++) {
-		if (stringsAreEqual(rows[rowInd].getValueAtIndex(j).getValue(), value)) {
+		if (stringsAreEqual(rows[rowInd].getCellAtIndex(j).getValue(), value)) {
 			return j;
 		}
 	}
@@ -351,10 +359,10 @@ size_t MarkdownTable::getLongestValueLength(size_t columnIndex) const{
 		return 0;
 	}
 
-	size_t maxLen = myStrlen(rows[0].getValueAtIndex(columnIndex).getValue());
+	size_t maxLen = myStrlen(rows[0].getCellAtIndex(columnIndex).getValue());
 
 	for (int i = 1; i < numberOfRows; i++) {
-		size_t temp = myStrlen(rows[i].getValueAtIndex(columnIndex).getValue());
+		size_t temp = myStrlen(rows[i].getCellAtIndex(columnIndex).getValue());
 		if (temp > maxLen) {
 			maxLen = temp;
 		}
@@ -370,7 +378,7 @@ const TableRow& MarkdownTable::getRowAtIndex(size_t index) const{
 const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 	// A hyphen is the symbol '-'
 
-	const char* str = rows[1].getValueAtIndex(columnIndex).getValue();
+	const char* str = rows[1].getCellAtIndex(columnIndex).getValue();
 
 	int foundInd = findSymbolInString(str, COLON);
 
@@ -402,15 +410,14 @@ const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 	else {
 		return Alignment::center;
 	}
-
 }
 
 bool rowsAreValid(const TableRow* rows, size_t numberOfRows) {
-	size_t numberOfColumnsInFirstRow = rows[0].getNumberOfValues();
+	size_t numberOfCellsInFirstRow = rows[0].getNumberOfCells();
 
-	// Compare the number of columns in the first row to all other 
+	// Compare the number of cells in the first row to all other 
 	for (int i = 1; i < numberOfRows; i++) {
-		if (rows[i].getNumberOfValues() != numberOfColumnsInFirstRow) {
+		if (rows[i].getNumberOfCells() != numberOfCellsInFirstRow) {
 			return false;
 		}
 	}

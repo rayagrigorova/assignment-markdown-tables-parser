@@ -2,15 +2,15 @@
 
 #include "TableValue.h"
 
-TableValue::TableValue() : TableValue(DEFAULT_VAL) {
+TableCell::TableCell() : TableCell(DEFAULT_VAL) {
 
 }
 
-TableValue::TableValue(const char* value) {
+TableCell::TableCell(const char* value) {
 	setValue(value);
 }
 
-TableValue::~TableValue() {
+TableCell::~TableCell() {
 
 }
 
@@ -51,7 +51,7 @@ namespace {
 	}
 }
 
-void TableValue::setValue(const char* value) {
+void TableCell::setValue(const char* value) {
 	//If the new value is invalid, set this->value to "Unknown"
 	if (myStrlen(value) > MAX_NUMBER_OF_SYMBOLS || value == nullptr) {
 		myStrcpy(this->value, DEFAULT_VAL);
@@ -62,22 +62,21 @@ void TableValue::setValue(const char* value) {
 	}
 }
 
-const char* TableValue::getValue() const {
+const char* TableCell::getValue() const {
 	return value;
 }
 
-size_t TableValue::getValueLength() const {
+size_t TableCell::getValueLength() const {
 	return myStrlen(getValue());
 }
 
 // Index is the number of the value's column 
-void TableValue::writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const {
+void TableCell::writeCellToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfCells, char charToWrite) const {
 	os << ' ' << PIPE << ' ';
 
 	size_t length = getValueLength();
 	size_t numberOfChars = width - length;
 
-	//Evenly distribute the spaces on both sides
 	if (alignment == Alignment::center) {
 		numberOfChars /= 2;
 	}
@@ -92,16 +91,17 @@ void TableValue::writeValueToStream(std::ostream& os, const Alignment& alignment
 		printSymbolNTimes(os, charToWrite, numberOfChars);
 	}
 
+	//Evenly distribute the spaces on both sides
 	else if (alignment == Alignment::center) {
 		printSymbolNTimes(os, charToWrite, width - length - numberOfChars);
 	}
 
 	//If the value to be printed is the last one, add one extra '|'
-	if (index == numberOfValues - 1) {
+	if (index == numberOfCells - 1) {
 		os << " " << PIPE << "\n";
 	}
 }
 
-void TableValue::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const {
-	writeValueToStream(std::cout, alignment, width, index, numberOfValues, charToWrite);
+void TableCell::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfCells, char charToWrite) const {
+	writeCellToStream(std::cout, alignment, width, index, numberOfCells, charToWrite);
 }

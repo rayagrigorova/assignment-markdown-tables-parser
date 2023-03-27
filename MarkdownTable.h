@@ -7,6 +7,7 @@ const int MAX_NUMBER_OF_ROWS = 50;
 class MarkdownTable {
 private:
 	TableRow rows[MAX_NUMBER_OF_ROWS];
+
 	size_t numberOfRows = 0;  // The actual number of rows and columns in the table
 	size_t numberOfColumns = 0;
 
@@ -14,9 +15,10 @@ private:
 	Alignment alignments[MAX_NUMBER_OF_COLS];
 
 	// A helper function
+	// Find the column of a cell using its value and row index
 	int findColumnIndex(const char* value, const size_t rowInd) const;
 
-	// Using the second row of the table, determine the alignment of all columns 
+	// Using the second row of the table, determine the alignments of all columns 
 	void initAlignments();
 
 	// Needed for printing - the longest value in a column 
@@ -28,6 +30,7 @@ private:
 	const Alignment identifyAlignment(size_t columnIndex) const;
 
 	// Create an array containg the widths of the table columns
+	// Used in printing/writing functions.
 	size_t* calculateColumnWidths() const;
 
 public:
@@ -53,15 +56,15 @@ public:
 	void setNumberOfColumns(size_t numberOfColumns);
 
 	void print() const;
-	void selectPrint(const char* value, size_t columnIndex) const;
+	void selectPrint(const char* value, const char* columnName) const;
 
 	void changeColumnName(const char* oldName, const char* newName);
 
 	void addRow(const TableRow& row);
 	void addRow(const char* row);
 
-	void changeValueAtIndex(size_t rowNumber, const char* columnName, const char* newValue);
-	void changeValue(const char* oldValue, const char* newValue, const char* columnName);
+	void changeCellAtIndex(size_t rowNumber, const char* columnName, const char* newValue);
+	void changeCell(const char* oldValue, const char* newValue, const char* columnName);
 
 	void saveToFile(const char* fileName) const;
 	void loadFromFile(const char* fileName);

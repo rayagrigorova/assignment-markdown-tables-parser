@@ -2,34 +2,34 @@
 
 #include "TableValue.h"
 
-//The number of values in a row shouldn't exceed 10 
+//The number of columns in a row shouldn't exceed 10 
 const int MAX_NUMBER_OF_COLS = 10;
 
 class TableRow {
 private:
-	TableValue values[MAX_NUMBER_OF_COLS];
-	size_t numberOfValues; // In the table, this is equal to the number of columns a row has
+	TableCell cells[MAX_NUMBER_OF_COLS];
+	size_t numberOfCells; // In the table, this is equal to the number of columns a row has
 
 public:
 	TableRow();
-	TableRow(const TableValue* values, size_t numberOfValues);
-	TableRow(const char* values); /* This constructor may be easier to use because it
+	TableRow(const TableCell* cells, size_t numberOfCells);
+	TableRow(const char* cells); /* This constructor may be easier to use because it
 													         does't require creating a TableValue array*/
 	~TableRow();
 
-	void setNumberOfValues(size_t numberOfValues);
-	void setValues(const TableValue* values, size_t numberOfValues);
-	void setValues(const char* values);
+	void setNumberOfCells(size_t numberOfCells);
+	void setCells(const TableCell* cells, size_t numberOfCells);
+	void setCells(const char* cells);
 
-	void setValueAtIndex(const TableValue& value, size_t index);
-	void setValueAtIndex(const char* value, size_t index);
+	void setCellAtIndex(const TableCell& value, size_t index);
+	void setCellAtIndex(const char* value, size_t index);
 
-	const TableValue* getValues() const;
-	size_t getNumberOfValues() const;
+	const TableCell* getCells() const;
+	size_t getNumberOfCells() const;
 
-	const TableValue& getValueAtIndex(size_t index) const;
+	const TableCell& getCellAtIndex(size_t index) const;
 
-	void readValuesFromStream(std::ifstream& ifs);
-	void writeValuesToStream(std::ostream& os, const Alignment* alignments, const size_t* widths, char charToWrite) const;
-	void printValues(const Alignment* alignments, const size_t* widths, char charToWrite) const;
+	void readCellsFromStream(std::ifstream& ifs);
+	void writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths, char charToWrite) const;
+	void printCells(const Alignment* alignments, const size_t* widths, char charToWrite) const;
 };

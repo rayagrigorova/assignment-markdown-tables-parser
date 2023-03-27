@@ -14,19 +14,19 @@ const char PIPE = '|';
 const char COLON = ':';
 const char SPACE = ' ';
 
-class TableValue {
+class TableCell {
 private:
 	char value[MAX_NUMBER_OF_SYMBOLS + 1];
 public:
-	TableValue();
-	TableValue(const char* value);
+	TableCell();
+	TableCell(const char* value);
 
-	~TableValue();
+	~TableCell();
 
 	void setValue(const char* value);
 	const char* getValue() const;
 	size_t getValueLength() const;
 
-	void writeValueToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const;
-	void printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfValues, char charToWrite) const;
+	void writeCellToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfCells, char charToWrite) const;
+	void printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfCells, char charToWrite) const;
 };

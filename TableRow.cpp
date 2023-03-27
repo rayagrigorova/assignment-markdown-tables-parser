@@ -5,20 +5,20 @@
 #include "TableRow.h"
 
 TableRow::TableRow(){
-	numberOfValues = 0;
+	numberOfCells = 0;
 
 	for (int i = 0; i < MAX_NUMBER_OF_COLS; i++) {
-		values[i].setValue(DEFAULT_VAL);
+		cells[i].setValue(DEFAULT_VAL);
 	}
 }
 
-TableRow::TableRow(const TableValue* values, size_t numberOfValues) {
-	setNumberOfValues(numberOfValues);
-	setValues(values, this->numberOfValues);
+TableRow::TableRow(const TableCell* cells, size_t numberOfCells) {
+	setNumberOfCells(numberOfCells);
+	setCells(cells, this->numberOfCells);
 }
 
-TableRow::TableRow(const char* values) {
-	setValues(values);
+TableRow::TableRow(const char* cells) {
+	setCells(cells);
 }
 
 TableRow::~TableRow() {
@@ -66,73 +66,73 @@ namespace {
 	}
 }
 
-void TableRow::setNumberOfValues(size_t numberOfValues) {
-	if (numberOfValues > MAX_NUMBER_OF_COLS) {
-		this->numberOfValues = 0;
+void TableRow::setNumberOfCells(size_t numberOfCells) {
+	if (numberOfCells > MAX_NUMBER_OF_COLS) {
+		this->numberOfCells = 0;
 		return;
 	}
-	this->numberOfValues = numberOfValues;
+	this->numberOfCells = numberOfCells;
 }
 
-void TableRow::setValues(const char* values) {
-	size_t count = countCharacterOccurances(values, ' ') + 1;
+void TableRow::setCells(const char* cells) {
+	size_t count = countCharacterOccurances(cells, ' ') + 1;
 
-	setNumberOfValues(count);
-	if (this->numberOfValues == 0) {
+	setNumberOfCells(count);
+	if (this->numberOfCells == 0) {
 		return;
 	}
 
-	std::stringstream ss(values);
+	std::stringstream ss(cells);
 	char buff[MAX_NUMBER_OF_SYMBOLS + 1];
 
-	for (int i = 0; i < this->numberOfValues - 1; i++) {
-		// Get each of the values from the string stream
+	for (int i = 0; i < this->numberOfCells - 1; i++) {
+		// Get each of the cells from the string stream
 		ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, ' ');
-		this->values[i].setValue(buff);
+		this->cells[i].setValue(buff);
 	}
 
 	ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1);
-	this->values[numberOfValues - 1].setValue(buff);
+	this->cells[numberOfCells - 1].setValue(buff);
 }
 
-void TableRow::setValues(const TableValue* values, size_t count) {
-	setNumberOfValues(count);
+void TableRow::setCells(const TableCell* cells, size_t count) {
+	setNumberOfCells(count);
 
-	for (int i = 0; i < this->numberOfValues; i++) {
-		setValueAtIndex(values[i], i);
+	for (int i = 0; i < this->numberOfCells; i++) {
+		setCellAtIndex(cells[i], i);
 	}
 }
 
-size_t TableRow::getNumberOfValues() const {
-	return numberOfValues;
+size_t TableRow::getNumberOfCells() const {
+	return numberOfCells;
 }
 
-const TableValue* TableRow::getValues() const {
-	return values;
+const TableCell* TableRow::getCells() const {
+	return cells;
 }
 
-void TableRow::setValueAtIndex(const TableValue& value, size_t index) {
-	if (index >= numberOfValues) {
+void TableRow::setCellAtIndex(const TableCell& cell, size_t index) {
+	if (index >= numberOfCells) {
 		return;
 	}
-	values[index].setValue(value.getValue());
+	cells[index].setValue(cell.getValue());
 }
 
-void TableRow::setValueAtIndex(const char* value, size_t index) {
-	if (index >= numberOfValues) {
+void TableRow::setCellAtIndex(const char* cell, size_t index) {
+	if (index >= numberOfCells) {
 		return;
 	}
-	values[index].setValue(value);
+	cells[index].setValue(cell);
 }
 
-const TableValue& TableRow::getValueAtIndex(size_t index) const{
-	if (index >= numberOfValues) {
+const TableCell& TableRow::getCellAtIndex(size_t index) const{
+	if (index >= numberOfCells) {
 		return nullptr;
 	}
-	return values[index];
+	return cells[index];
 }
 
-void TableRow::readValuesFromStream(std::ifstream& ifs){
+void TableRow::readCellsFromStream(std::ifstream& ifs){
 	if (!ifs.is_open()) {
 		return;
 	}
@@ -140,19 +140,19 @@ void TableRow::readValuesFromStream(std::ifstream& ifs){
 	// Each line in the file is one row in the table
 	size_t numberOfValuesInLine = countCharacterOccurancesInFileLine(ifs, PIPE) - 1;
 
-	setNumberOfValues(numberOfValuesInLine);
+	setNumberOfCells(numberOfValuesInLine);
 
 	char buff[MAX_NUMBER_OF_SYMBOLS + 1];
 
 	//Skip the first '|' symbol of the file
 	ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
 
-	for (int i = 0; !ifs.eof() && i < this->numberOfValues; i++) {
+	for (int i = 0; !ifs.eof() && i < this->numberOfCells; i++) {
 		//Get all symbols up to '|'
 		ifs >> buff;
 		//ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
 
-		values[i].setValue(buff);
+		cells[i].setValue(buff);
 		ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
 	}
 	
@@ -163,13 +163,13 @@ void TableRow::readValuesFromStream(std::ifstream& ifs){
 	}
 }
 
-void TableRow::writeValuesToStream(std::ostream& os, const Alignment* alignments, const size_t* widths, char charToWrite) const{
-	for (int j = 0; j < numberOfValues; j++) {
-		values[j].writeValueToStream(os, alignments[j], widths[j], j, numberOfValues, charToWrite);
+void TableRow::writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths, char charToWrite) const{
+	for (int j = 0; j < numberOfCells; j++) {
+		cells[j].writeCellToStream(os, alignments[j], widths[j], j, numberOfCells, charToWrite);
 	}
 }
 
-void TableRow::printValues(const Alignment* alignments, const size_t* widths, char charToWrite) const {
-	writeValuesToStream(std::cout, alignments, widths, charToWrite);
+void TableRow::printCells(const Alignment* alignments, const size_t* widths, char charToWrite) const {
+	writeCellsToStream(std::cout, alignments, widths, charToWrite);
 }
 
