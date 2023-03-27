@@ -51,14 +51,16 @@ namespace {
 	}
 }
 
-void TableCell::setValue(const char* value) {
+bool TableCell::setValue(const char* value) {
 	//If the new value is invalid, set this->value to "Unknown"
 	if (myStrlen(value) > MAX_NUMBER_OF_SYMBOLS || value == nullptr) {
 		myStrcpy(this->value, DEFAULT_VAL);
+		return false;
 	}
 
 	else {
 		myStrcpy(this->value, value);
+		return true;
 	}
 }
 
@@ -71,7 +73,11 @@ size_t TableCell::getValueLength() const {
 }
 
 // Index is the number of the value's column 
-void TableCell::writeCellToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const {
+bool TableCell::writeCellToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const {
+	if (!os.good()) {
+		return false;
+	}
+
 	os << ' ' << PIPE << ' ';
 
 	size_t length = getValueLength();
@@ -100,8 +106,10 @@ void TableCell::writeCellToStream(std::ostream& os, const Alignment& alignment, 
 	if (index == numberOfCells - 1) {
 		os << " " << PIPE << "\n";
 	}
+
+	return true;
 }
 
-void TableCell::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const {
-	writeCellToStream(std::cout, alignment, width, index, numberOfCells);
+bool TableCell::printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const {
+	return writeCellToStream(std::cout, alignment, width, index, numberOfCells);
 }

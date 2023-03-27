@@ -23,10 +23,10 @@ public:
 
 	~TableCell();
 
-	void setValue(const char* value);
+	bool setValue(const char* value);
 	const char* getValue() const;
 	size_t getValueLength() const;
 
-	void writeCellToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const;
-	void printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const;
+	bool writeCellToStream(std::ostream& os, const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const;
+	bool printValue(const Alignment& alignment, size_t width, size_t index, size_t numberOfCells) const;
 };

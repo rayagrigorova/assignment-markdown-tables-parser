@@ -243,41 +243,46 @@ void MarkdownTable::selectPrint(const char* value, const char* columnName) const
 	delete[] columnWidths;
 }
 
-void MarkdownTable::changeColumnName(const char* oldName, const char* newName) {
+bool MarkdownTable::changeColumnName(const char* oldName, const char* newName) {
 	// The row containing the column names is rows[0]
 	size_t columnIndex = findColumnIndex(oldName, 0);
 
-	rows[0].setCellAtIndex(newName, columnIndex);
+	return rows[0].setCellAtIndex(newName, columnIndex);
 }
 
-void MarkdownTable::addRow(const TableRow& row) {
+bool MarkdownTable::addRow(const TableRow& row) {
 	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
-		return;
+		return false;
 	}
 	rows[numberOfRows++] = row;
+	return true;
 }
 
-void MarkdownTable::addRow(const char* row) {
+bool MarkdownTable::addRow(const char* row) {
 	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
-		return;
+		return false;
 	}
 
 	TableRow r(row);
 	if (r.getNumberOfCells() == numberOfColumns) {
 		rows[numberOfRows++] = r;
+		return true;
 	}
+
+	return false;
 }
 
-void MarkdownTable::changeCellAtIndex(size_t rowNumber, const char* columnName, const char* newValue) {
-	// The row numbering starts from 1
-	rowNumber--;
+bool MarkdownTable::changeRow(size_t rowNumber, const char* columnName, const char* newValue) {
+	// The first 2 rows of the table don't contain values
+	// The first row that conatins actual values is rows[2]
+	rowNumber++;
 
 	size_t columnIndex = findColumnIndex(columnName, rowNumber);
 
-	rows[rowNumber].setCellAtIndex(newValue, columnIndex);
+	return rows[rowNumber].setCellAtIndex(newValue, columnIndex);
 }
 
-void MarkdownTable::changeCell(const char* oldValue, const char* newValue, const char* columnName) {
+bool MarkdownTable::changeCell(const char* oldValue, const char* newValue, const char* columnName) {
 	// First, find the index of the column which corresponds to the columnName
 	int columnInd = -1;
 
@@ -289,41 +294,44 @@ void MarkdownTable::changeCell(const char* oldValue, const char* newValue, const
 	}
 
 	if (columnInd < 0) {
-		return;
+		return false;
 	}
 
 	for (int i = 0; i < numberOfRows; i++) {
 		if (stringsAreEqual(rows[i].getCellAtIndex(columnInd).getValue(), oldValue)) {
-			rows[i].setCellAtIndex(newValue, columnInd);
+			return rows[i].setCellAtIndex(newValue, columnInd);
 			break;
 		}
 	}
+	return false;
 }
 
-void MarkdownTable::saveToFile(const char* fileName) const {
+bool MarkdownTable::saveToFile(const char* fileName) const {
 	std::ofstream file(fileName);
 	if (!file.is_open()) {
-		return;
+		return false;
 	}
 
 	size_t* columnWidths = calculateColumnWidths();
 
 	for (int i = 0; i < numberOfRows; i++) {
 		for (int j = 0; j < numberOfColumns; j++) {
-			char charToWrite = (i == 1) ? HYPHEN : SPACE;
-			rows[i].writeCellsToStream(file, alignments, columnWidths);
+			if (!rows[i].writeCellsToStream(file, alignments, columnWidths)) {
+				return false;
+			}
 		}
 	}
 
 	file.close();
 	delete[] columnWidths;
+	return true;
 }
 
-void MarkdownTable::loadFromFile(const char* fileName) {
+bool MarkdownTable::loadFromFile(const char* fileName) {
 	std::ifstream file(fileName);
 
 	if (!file.is_open()) {
-		return;
+		return false;
 	}
 
 	size_t numberOfRows = countCharacterOccurancesInFile(file, '\n') + 1;
@@ -331,13 +339,20 @@ void MarkdownTable::loadFromFile(const char* fileName) {
 	setNumberOfRows(numberOfRows);
 
 	for (size_t i = 0; i < this->numberOfRows; i++) {
-		rows[i].readCellsFromStream(file);
+		if (!rows[i].readCellsFromStream(file)) {
+			return false;
+		}
+	}
+	
+	if (!rowsAreValid(this->rows, numberOfRows)) {
+		return false;
 	}
 
 	setNumberOfColumns(rows[0].getNumberOfCells());
 
 	initAlignments();
 	file.close();
+	return true;
 }
 
 // Find the column index of a cell on a given row using the cell's value
@@ -422,6 +437,10 @@ const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 }
 
 bool rowsAreValid(const TableRow* rows, size_t numberOfRows) {
+	if (numberOfRows == 0 || rows == nullptr) {
+		return false;
+	}
+
 	size_t numberOfCellsInFirstRow = rows[0].getNumberOfCells();
 
 	// Compare the number of cells in the first row to all other 

@@ -62,16 +62,16 @@ public:
 	void print() const;
 	void selectPrint(const char* value, const char* columnName) const;
 
-	void changeColumnName(const char* oldName, const char* newName);
+	bool changeColumnName(const char* oldName, const char* newName);
 
-	void addRow(const TableRow& row);
-	void addRow(const char* row);
+	bool addRow(const TableRow& row);
+	bool addRow(const char* row);
 
-	void changeCellAtIndex(size_t rowNumber, const char* columnName, const char* newValue);
-	void changeCell(const char* oldValue, const char* newValue, const char* columnName);
+	bool changeRow(size_t rowNumber, const char* columnName, const char* newValue);
+	bool changeCell(const char* oldValue, const char* newValue, const char* columnName);
 
-	void saveToFile(const char* fileName) const;
-	void loadFromFile(const char* fileName);
+	bool saveToFile(const char* fileName) const;
+	bool loadFromFile(const char* fileName);
 };
 
 // All rows must have the same number of values in them

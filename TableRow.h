@@ -21,15 +21,16 @@ public:
 	void setCells(const TableCell* cells, size_t numberOfCells);
 	void setCells(const char* cells);
 
-	void setCellAtIndex(const TableCell& value, size_t index);
-	void setCellAtIndex(const char* value, size_t index);
+	bool setCellAtIndex(const TableCell& value, size_t index);
+	bool setCellAtIndex(const char* value, size_t index);
 
 	const TableCell* getCells() const;
 	size_t getNumberOfCells() const;
 
 	const TableCell& getCellAtIndex(size_t index) const;
 
-	void readCellsFromStream(std::ifstream& ifs);
-	void writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths) const;
-	void printCells(const Alignment* alignments, const size_t* widths) const;
+	bool readCellsFromStream(std::ifstream& ifs);
+
+	bool writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths) const;
+	bool printCells(const Alignment* alignments, const size_t* widths) const;
 };

@@ -111,18 +111,18 @@ const TableCell* TableRow::getCells() const {
 	return cells;
 }
 
-void TableRow::setCellAtIndex(const TableCell& cell, size_t index) {
+bool TableRow::setCellAtIndex(const TableCell& cell, size_t index) {
 	if (index >= numberOfCells) {
-		return;
+		return false;
 	}
-	cells[index].setValue(cell.getValue());
+	return cells[index].setValue(cell.getValue());
 }
 
-void TableRow::setCellAtIndex(const char* cell, size_t index) {
+bool TableRow::setCellAtIndex(const char* cell, size_t index) {
 	if (index >= numberOfCells) {
-		return;
+		return false;
 	}
-	cells[index].setValue(cell);
+	return cells[index].setValue(cell);
 }
 
 const TableCell& TableRow::getCellAtIndex(size_t index) const{
@@ -132,9 +132,9 @@ const TableCell& TableRow::getCellAtIndex(size_t index) const{
 	return cells[index];
 }
 
-void TableRow::readCellsFromStream(std::ifstream& ifs){
+bool TableRow::readCellsFromStream(std::ifstream& ifs){
 	if (!ifs.is_open()) {
-		return;
+		return false;
 	}
 
 	// Each line in the file is one row in the table
@@ -161,15 +161,20 @@ void TableRow::readCellsFromStream(std::ifstream& ifs){
 	if (!ifs.eof()) {
 		ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, '\n');
 	}
+
+	return true;
 }
 
-void TableRow::writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths) const{
+bool TableRow::writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths) const{
 	for (int j = 0; j < numberOfCells; j++) {
-		cells[j].writeCellToStream(os, alignments[j], widths[j], j, numberOfCells);
+		if (!cells[j].writeCellToStream(os, alignments[j], widths[j], j, numberOfCells)) {
+			return false;
+		}
 	}
+	return true;
 }
 
-void TableRow::printCells(const Alignment* alignments, const size_t* widths) const {
-	writeCellsToStream(std::cout, alignments, widths);
+bool TableRow::printCells(const Alignment* alignments, const size_t* widths) const {
+	return writeCellsToStream(std::cout, alignments, widths);
 }
 
