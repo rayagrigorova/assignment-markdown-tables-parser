@@ -154,14 +154,14 @@ void MarkdownTableParser::change() {
 	}
 
 	// Change the first matching value in a column with a given value
-	else if (numberOfSpaces == 2){
+	else if (numberOfSpaces == 1){
 		char* ptr = buff;
 		size_t pos = 0;
 
-		for (; *(ptr++) != ' '; pos++);
+		for (; *(ptr) != ' '; pos++, ptr++);
 
 		*ptr = '\0';
-		operationWasSuccessful = table.changeCell(ptr, ptr + pos + 1, columnName);
+		operationWasSuccessful = table.changeCell(ptr - pos, ptr + 1, columnName);
 	}
 
 	if (operationWasSuccessful) {
@@ -196,8 +196,10 @@ void MarkdownTableParser::addRow() {
 	// The number of cells in the row is equal to the
 	// number of columns in the table
 	size_t numberOfCells = table.getNumberOfColumns(); 
+	size_t numberOfSymbols = (MAX_NUMBER_OF_SYMBOLS + 1) * numberOfCells;
 
-	char* buff = new char[(MAX_NUMBER_OF_SYMBOLS + 1) * numberOfCells];
+	char* buff = new char[numberOfSymbols];
+	std::cin.getline(buff, numberOfSymbols);
 	TableRow r(buff);
 
 	if (table.addRow(r)) {

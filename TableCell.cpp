@@ -104,7 +104,7 @@ bool TableCell::writeCellToStream(std::ostream& os, const Alignment& alignment, 
 
 	//If the value to be printed is the last one, add one extra '|'
 	if (index == numberOfCells - 1) {
-		os << " " << PIPE << "\n";
+		os << " " << PIPE;
 	}
 
 	return true;

@@ -220,12 +220,14 @@ void MarkdownTable::print() const {
 	size_t* columnWidths = calculateColumnWidths();
 
 	rows[0].printCells(alignments, columnWidths);
+	std::cout << '\n';
 	printSecondRow(columnWidths);
+	std::cout << '\n';
 
 	for (int i = 2; i < numberOfRows; i++) {
 		rows[i].printCells(alignments, columnWidths);
+		std::cout << '\n';
 	}
-
 	delete[] columnWidths;
 }
 
@@ -315,10 +317,11 @@ bool MarkdownTable::saveToFile(const char* fileName) const {
 	size_t* columnWidths = calculateColumnWidths();
 
 	for (int i = 0; i < numberOfRows; i++) {
-		for (int j = 0; j < numberOfColumns; j++) {
-			if (!rows[i].writeCellsToStream(file, alignments, columnWidths)) {
-				return false;
-			}
+		if (!rows[i].writeCellsToStream(file, alignments, columnWidths)) {
+			return false;
+		}
+		if (i != numberOfRows - 1) {
+			file << "\n";
 		}
 	}
 
@@ -446,6 +449,12 @@ bool rowsAreValid(const TableRow* rows, size_t numberOfRows) {
 	// Compare the number of cells in the first row to all other 
 	for (int i = 1; i < numberOfRows; i++) {
 		if (rows[i].getNumberOfCells() != numberOfCellsInFirstRow) {
+			Alignment alignments[3];
+			size_t widths[3];
+			for (int i = 0; i < 3; i++) {
+				alignments[i] = Alignment::left; widths[i] = 15;
+				rows->printCells(alignments, widths);
+			}
 			return false;
 		}
 	}
@@ -464,5 +473,5 @@ void MarkdownTable::printSecondRow(const size_t* widths) const{
 			std::cout << HYPHEN;
 		}
 	}
-	std::cout << SPACE << PIPE << "\n";
+	std::cout << SPACE << PIPE;
 }
