@@ -163,13 +163,13 @@ void TableRow::readCellsFromStream(std::ifstream& ifs){
 	}
 }
 
-void TableRow::writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths, char charToWrite) const{
+void TableRow::writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths) const{
 	for (int j = 0; j < numberOfCells; j++) {
-		cells[j].writeCellToStream(os, alignments[j], widths[j], j, numberOfCells, charToWrite);
+		cells[j].writeCellToStream(os, alignments[j], widths[j], j, numberOfCells);
 	}
 }
 
-void TableRow::printCells(const Alignment* alignments, const size_t* widths, char charToWrite) const {
-	writeCellsToStream(std::cout, alignments, widths, charToWrite);
+void TableRow::printCells(const Alignment* alignments, const size_t* widths) const {
+	writeCellsToStream(std::cout, alignments, widths);
 }
 

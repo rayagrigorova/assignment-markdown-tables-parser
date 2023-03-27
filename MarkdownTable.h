@@ -33,6 +33,10 @@ private:
 	// Used in printing/writing functions.
 	size_t* calculateColumnWidths() const;
 
+	// A seperate function to print the second row. 
+	// The second row seperates the column names from the rest of the table.
+	void printSecondRow(const size_t* widths) const;
+
 public:
 	MarkdownTable();
 	MarkdownTable(const TableRow* rows, size_t numberOfRows);

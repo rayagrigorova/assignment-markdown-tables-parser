@@ -219,8 +219,11 @@ size_t* MarkdownTable::calculateColumnWidths() const{
 void MarkdownTable::print() const {
 	size_t* columnWidths = calculateColumnWidths();
 
-	for (int i = 0; i < numberOfRows; i++) {
-		rows[i].printCells(alignments, columnWidths, ' ');
+	rows[0].printCells(alignments, columnWidths);
+	printSecondRow(columnWidths);
+
+	for (int i = 2; i < numberOfRows; i++) {
+		rows[i].printCells(alignments, columnWidths);
 	}
 
 	delete[] columnWidths;
@@ -233,8 +236,7 @@ void MarkdownTable::selectPrint(const char* value, const char* columnName) const
 	//Print all rows which have a given value on a given column 
 	for (int i = 0; i < numberOfRows; i++) {
 		if (stringsAreEqual(value, rows[i].getCellAtIndex(columnIndex).getValue())) {
-			char charToWrite = (i == 1) ? HYPHEN : SPACE;
-			rows[i].printCells(alignments, columnWidths, charToWrite);
+			rows[i].printCells(alignments, columnWidths);
 		}
 	}
 
@@ -309,7 +311,7 @@ void MarkdownTable::saveToFile(const char* fileName) const {
 	for (int i = 0; i < numberOfRows; i++) {
 		for (int j = 0; j < numberOfColumns; j++) {
 			char charToWrite = (i == 1) ? HYPHEN : SPACE;
-			rows[i].writeCellsToStream(file, alignments, columnWidths, charToWrite);
+			rows[i].writeCellsToStream(file, alignments, columnWidths);
 		}
 	}
 
@@ -387,26 +389,33 @@ const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 		return Alignment::left;
 	}
 
-	bool left = false;
+	bool hasLeftAlignment = false;
 
 	// :---
 	if (str[foundInd + 1] == HYPHEN) {
-		left = true;
+		hasLeftAlignment = true;
 	}
 
 	// Search for the next ':' symbol
 	str += foundInd;
+
+	// If the '\0' character hasn't been reached, go past the found position so that ':' isn't read again
+	if (*(str)) {
+		str++;
+	}
+
 	foundInd = findSymbolInString(str, COLON);
 
-	//No central alignment 
-	if (foundInd == -1) {
-		return Alignment::left;
+	// A second ':' symbol wasn't found. 
+	if (foundInd < 0) {
+		if (!hasLeftAlignment) {
+			return Alignment::right;
+		}
+		else {
+			return Alignment::left;
+		}
 	}
 
-	else if (!left) {
-		return Alignment::right;
-	}
-	
 	else {
 		return Alignment::center;
 	}
@@ -423,4 +432,18 @@ bool rowsAreValid(const TableRow* rows, size_t numberOfRows) {
 	}
 
 	return true;
+}
+
+void MarkdownTable::printSecondRow(const size_t* widths) const{
+	if (numberOfRows <= 1) {
+		return;
+	}
+
+	for (int j = 0; j < numberOfColumns; j++) {
+		std::cout << SPACE << PIPE << SPACE;
+		for (int i = 0; i < widths[j]; i++) {
+			std::cout << HYPHEN;
+		}
+	}
+	std::cout << SPACE << PIPE << "\n";
 }

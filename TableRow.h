@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TableValue.h"
+#include "TableCell.h"
 
 //The number of columns in a row shouldn't exceed 10 
 const int MAX_NUMBER_OF_COLS = 10;
@@ -30,6 +30,6 @@ public:
 	const TableCell& getCellAtIndex(size_t index) const;
 
 	void readCellsFromStream(std::ifstream& ifs);
-	void writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths, char charToWrite) const;
-	void printCells(const Alignment* alignments, const size_t* widths, char charToWrite) const;
+	void writeCellsToStream(std::ostream& os, const Alignment* alignments, const size_t* widths) const;
+	void printCells(const Alignment* alignments, const size_t* widths) const;
 };

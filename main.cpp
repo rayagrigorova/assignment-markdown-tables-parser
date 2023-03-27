@@ -35,6 +35,20 @@ int main()
 	table.print();
 	std::cout << "\n\n";
 
+	//const Alignment* alignments = table.getAlignments();
+	//for (int i = 0; i < table.getNumberOfColumns(); i++) {
+	//	switch (alignments[i]) {
+	//	case Alignment::center:
+	//		std::cout << "Center  ";
+	//		break;
+	//	case Alignment::right:
+	//		std::cout << "Right  ";
+	//		break;
+	//	case Alignment::left:
+	//		std::cout << "Left  ";
+	//		break;
+	//	}
+	//}
 
 	//table.changeColumnName("Syntax", "Sin");
 	//table.print();
