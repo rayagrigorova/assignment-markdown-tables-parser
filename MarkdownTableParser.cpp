@@ -62,6 +62,7 @@ namespace {
 			if (*str == ch) {
 				ctr++;
 			}
+			str++;
 		}
 
 		return ctr;
@@ -70,7 +71,7 @@ namespace {
 
 const int MAX_FILENAME_LEN = 150;
 
-void MarkdownTableParser::load() {
+bool MarkdownTableParser::load() {
 	char fileName[MAX_FILENAME_LEN + 1];
 	std::cin.getline(fileName, MAX_FILENAME_LEN + 1);
 
@@ -78,17 +79,21 @@ void MarkdownTableParser::load() {
 
 	if (!loadedSuccessfully) {
 		std::cout << ERROR_MSG << "\n";
+		return false;
 	}
 
 	else {
 		std::cout << LOAD_SUCCESS << "\n";
+		return true;
 	}
 }
 
 const int MAX_INPUT_SIZE = 150;
 
 void MarkdownTableParser::interface() {
-	load();
+	if (!load()) {
+		return;
+	}
 	
 	//This loop will be exited after the table is saved to a file.
 	bool isSaved = false;
@@ -96,7 +101,8 @@ void MarkdownTableParser::interface() {
 	while (!isSaved) {
 		std::cout << ENTER_COMMAND_MSG << "\n";
 		char buff[MAX_INPUT_SIZE + 1];
-		std::cin.getline(buff, MAX_INPUT_SIZE + 1, ' ');
+		std::cin >> buff;
+		std::cin.ignore();
 
 		for (int i = 0; i < NUMBER_OF_COMMANDS; i++) {
 			if (stringsAreEqual(ALL_COMMANDS[i], buff)) {
@@ -140,10 +146,11 @@ void MarkdownTableParser::change() {
 
 	int numberOfSpaces = countCharOccurances(buff, ' ');
 
+	bool operationWasSuccessful = false;
+
 	// Change the name of a column
 	if (numberOfSpaces == 0) {
-		table.changeColumnName(columnName, buff);
-		return;
+		operationWasSuccessful = table.changeColumnName(columnName, buff);
 	}
 
 	// Change the first matching value in a column with a given value
@@ -154,8 +161,11 @@ void MarkdownTableParser::change() {
 		for (; *(ptr++) != ' '; pos++);
 
 		*ptr = '\0';
-		table.changeCell(ptr, ptr + pos + 1, columnName);
-		return;
+		operationWasSuccessful = table.changeCell(ptr, ptr + pos + 1, columnName);
+	}
+
+	if (operationWasSuccessful) {
+		std::cout << OPERATION_SUCCESS << "\n";
 	}
 
 	else {
@@ -173,7 +183,13 @@ void MarkdownTableParser::changeRow() {
 	std::cin >> columnName >> newValue;
 	std::cin.ignore();
 
-	table.changeRow(rowNumber, columnName, newValue);
+	if (table.changeRow(rowNumber, columnName, newValue)) {
+		std::cout << OPERATION_SUCCESS << "\n";
+	}
+
+	else {
+		std::cout << ERROR_MSG << "\n";
+	}
 }
 
 void MarkdownTableParser::addRow() {
@@ -183,7 +199,14 @@ void MarkdownTableParser::addRow() {
 
 	char* buff = new char[(MAX_NUMBER_OF_SYMBOLS + 1) * numberOfCells];
 	TableRow r(buff);
-	table.addRow(r);
+
+	if (table.addRow(r)) {
+		std::cout << OPERATION_SUCCESS << "\n";
+	}
+
+	else {
+		std::cout << ERROR_MSG << "\n";
+	}
 
 	delete[] buff;
 }
@@ -193,14 +216,15 @@ void MarkdownTableParser::selectPrint() const{
 	std::cin.getline(columnName, MAX_NUMBER_OF_SYMBOLS + 1, ' ');
 
 	char value[MAX_NUMBER_OF_SYMBOLS + 1];
-	std::cin.getline(value, MAX_NUMBER_OF_SYMBOLS + 1, ' ');
+	std::cin.getline(value, MAX_NUMBER_OF_SYMBOLS + 1, '\n');
 
 	table.selectPrint(value, columnName);
 }
 
 bool MarkdownTableParser::save() const{
 	char fileName[MAX_FILENAME_LEN + 1];
-	table.saveToFile(fileName);
+	std::cin.getline(fileName, MAX_FILENAME_LEN + 1);
+	return table.saveToFile(fileName);
 }
 
 void MarkdownTableParser::print() const {

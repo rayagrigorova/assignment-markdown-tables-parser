@@ -13,7 +13,7 @@ public:
 
 	~MarkdownTableParser();
 
-	void load();
+	bool load();
 	void interface();
 	void change();
 	void changeRow();

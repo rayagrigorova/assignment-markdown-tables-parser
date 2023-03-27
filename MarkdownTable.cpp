@@ -277,7 +277,7 @@ bool MarkdownTable::changeRow(size_t rowNumber, const char* columnName, const ch
 	// The first row that conatins actual values is rows[2]
 	rowNumber++;
 
-	size_t columnIndex = findColumnIndex(columnName, rowNumber);
+	size_t columnIndex = findColumnIndex(columnName, 0);
 
 	return rows[rowNumber].setCellAtIndex(newValue, columnIndex);
 }
