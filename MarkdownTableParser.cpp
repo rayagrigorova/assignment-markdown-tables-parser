@@ -2,37 +2,8 @@
 
 #include "MarkdownTableParser.h"
 
-const char* OPERATION_SUCCESS = "Operation successfully executed!";
-const char* LOAD_SUCCESS = "Table loaded successfully!";
-const char* SAVE_SUCCESS = "File successfully saved!";
-const char* ERROR_MSG = "Operation failed.";
-const char* ENTER_COMMAND_MSG = "Enter a command.";
-const char* INVALID_OPERATION_MSG = "Invalid operation.";
-
-const int NUMBER_OF_COMMANDS = 6;
-
-const char* PRINT_COMMAND = "print";
-const char* CHANGE_COMMAND = "change";
-const char* CHANGE_ROW_COMMAND = "changeRow";
-const char* ADD_ROW_COMMAND = "addRow";
-const char* SELECT_COMMAND = "selectWhere";
-const char* SAVE_COMMAND = "save";
-
-const char* ALL_COMMANDS[] = { PRINT_COMMAND,
-CHANGE_COMMAND, CHANGE_ROW_COMMAND,
-ADD_ROW_COMMAND, SELECT_COMMAND, SAVE_COMMAND };
-
-
-MarkdownTableParser::MarkdownTableParser() : table(){
-
-}
-MarkdownTableParser::MarkdownTableParser(const MarkdownTable& table) : table(table.getRows(), table.getNumberOfRows()) {
-
-}
-
-MarkdownTableParser::~MarkdownTableParser() {
-
-}
+#include "Commands.h"
+#include "ErrorMessages.h"
 
 namespace {
 	bool stringsAreEqual(const char* str1, const char* str2) {
@@ -67,6 +38,10 @@ namespace {
 
 		return ctr;
 	}
+}
+
+MarkdownTableParser::MarkdownTableParser(const MarkdownTable& table) : table(table.getRows(), table.getNumberOfRows()) {
+
 }
 
 const int MAX_FILENAME_LEN = 150;
@@ -108,7 +83,7 @@ void MarkdownTableParser::interface() {
 			if (stringsAreEqual(ALL_COMMANDS[i], buff)) {
 				switch (i) {
 				case 0:
-					print();
+					printInfo();
 					break;
 				case 1:
 					change();
@@ -229,6 +204,6 @@ bool MarkdownTableParser::save() const{
 	return table.saveToFile(fileName);
 }
 
-void MarkdownTableParser::print() const {
-	table.print();
+void MarkdownTableParser::printInfo() const {
+	table.printInfo();
 }

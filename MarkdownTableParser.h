@@ -8,10 +8,8 @@ private:
 	MarkdownTable table;
 
 public:
-	MarkdownTableParser();
+	MarkdownTableParser() = default;
 	MarkdownTableParser(const MarkdownTable& table);
-
-	~MarkdownTableParser();
 
 	bool load();
 	void interface();
@@ -20,6 +18,6 @@ public:
 	void addRow();
 	void selectPrint() const;
 	bool save() const;
-	void print() const;
+	void printInfo() const;
 
 };

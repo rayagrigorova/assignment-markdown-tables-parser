@@ -8,8 +8,8 @@ class MarkdownTable {
 private:
 	TableRow rows[MAX_NUMBER_OF_ROWS];
 
-	size_t numberOfRows = 0;  // The actual number of rows and columns in the table
-	size_t numberOfColumns = 0;
+	size_t numberOfRows;  // The actual number of rows and columns in the table
+	size_t numberOfColumns;
 
 	// Each column has an alignment 
 	Alignment alignments[MAX_NUMBER_OF_COLS];
@@ -35,6 +35,7 @@ private:
 
 	// A seperate function to print the second row. 
 	// The second row seperates the column names from the rest of the table.
+	// Necessary, because information about alignment (':' symbols) shouldn't be printed. 
 	void printSecondRow(const size_t* widths) const;
 
 public:
@@ -42,8 +43,6 @@ public:
 	MarkdownTable(const TableRow* rows, size_t numberOfRows);
 	MarkdownTable(const char** rows, size_t numberOfRows);
 	MarkdownTable(const char* fileName);
-
-	~MarkdownTable();
 
 	const TableRow* getRows() const;
 	const size_t getNumberOfRows() const;
@@ -59,7 +58,7 @@ public:
 	void setNumberOfRows(size_t numberOfRows);
 	void setNumberOfColumns(size_t numberOfColumns);
 
-	void print() const;
+	void printInfo() const;
 	void selectPrint(const char* value, const char* columnName) const;
 
 	bool changeColumnName(const char* oldName, const char* newName);

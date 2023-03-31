@@ -8,14 +8,13 @@ const int MAX_NUMBER_OF_COLS = 10;
 class TableRow {
 private:
 	TableCell cells[MAX_NUMBER_OF_COLS];
-	size_t numberOfCells; // In the table, this is equal to the number of columns a row has
+	size_t numberOfCells = 0; // In the table, this is equal to the number of columns a row has
 
 public:
-	TableRow();
+	TableRow() = default;
 	TableRow(const TableCell* cells, size_t numberOfCells);
 	TableRow(const char* cells); /* This constructor may be easier to use because it
-													         does't require creating a TableValue array*/
-	~TableRow();
+					                does't require creating a TableValue array*/
 
 	void setNumberOfCells(size_t numberOfCells);
 	void setCells(const TableCell* cells, size_t numberOfCells);

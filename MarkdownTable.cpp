@@ -4,118 +4,6 @@
 
 #include "MarkdownTable.h"
 
-MarkdownTable::MarkdownTable() : rows(){
-	numberOfRows = 0;
-	numberOfColumns = 0;
-
-	for (int i = 0; i < numberOfColumns; i++) {
-		alignments[i] = Alignment::left;
-	}
-}
-
-MarkdownTable::MarkdownTable(const TableRow* rows, size_t numberOfRows) {
-	setRows(rows, numberOfRows);
-}
-
-MarkdownTable::MarkdownTable(const char** rows, size_t numberOfRows) {
-	setRows(rows, numberOfRows);
-}
-
-MarkdownTable::MarkdownTable(const char* fileName) {
-	loadFromFile(fileName);
-}
-
-MarkdownTable::~MarkdownTable() {
-
-}
-
-const TableRow* MarkdownTable::getRows() const {
-	return rows;
-}
-
-const size_t MarkdownTable::getNumberOfRows() const {
-	return numberOfRows;
-}
-
-const size_t MarkdownTable::getNumberOfColumns() const {
-	return numberOfColumns;
-}
-
-void MarkdownTable::setColumnNames(TableRow columnNames) {
-	// If the number of columns in the table doesn't match the number of 
-	// columns of the given value, return. 
-	if (columnNames.getNumberOfCells() != this->numberOfColumns) {
-		return;
-	}
-
-	// The table row containing the column names is rows[0]
-	for (int i = 0; i < this->numberOfColumns; i++) {
-		this->rows[0].setCellAtIndex(columnNames.getCellAtIndex(i), i);
-	}
-}
-
-void MarkdownTable::setColumnNames(const char* columnNames) {
-	// Create new row from the column names 
-	TableRow r(columnNames);
-
-	if (r.getNumberOfCells() != this->numberOfColumns) {
-		return;
-	}
-
-	for (int i = 0; i < this->numberOfColumns; i++) {
-		this->rows[0].setCellAtIndex(r.getCellAtIndex(i), i);
-	}
-}
-
-void MarkdownTable::setRows(const TableRow* rows, size_t numberOfRows) {
-	if (!rowsAreValid(rows, numberOfRows)) {
-		return;
-	}
-
-	setNumberOfRows(numberOfRows);
-	setNumberOfColumns(rows[0].getNumberOfCells());
-
-	for (int i = 0; i < this->numberOfRows; i++) {
-		this->rows[i].setCells(rows[i].getCells(), this->numberOfColumns);
-	}
-
-	initAlignments();
-}
-
-void MarkdownTable::setRows(const char** rows, size_t numberOfRows) {
-	// Create an array of table rows using the TableRow(char* ) constructor 
-	TableRow* arr = new TableRow[numberOfRows];
-	for (int i = 0; i < numberOfRows; i++) {
-		arr[i] = TableRow(rows[i]);
-	}
-
-	if (!rowsAreValid(arr, numberOfRows)) {
-		return;
-	}
-
-	setNumberOfRows(numberOfRows);
-	setNumberOfColumns(arr[0].getNumberOfCells());
-
-	for (int i = 0; i < numberOfRows; i++) {
-		this->rows[i].setCells(arr[i].getCells(), this->numberOfColumns);
-	}
-
-	initAlignments();
-	delete[] arr;
-}
-
-void MarkdownTable::setNumberOfRows(size_t numberOfRows) {
-	if (numberOfRows <= MAX_NUMBER_OF_ROWS) {
-		this->numberOfRows = numberOfRows;
-	}
-}
-
-void MarkdownTable::setNumberOfColumns(size_t numberOfColumns) {
-	if (numberOfColumns <= MAX_NUMBER_OF_COLS) {
-		this->numberOfColumns = numberOfColumns;
-	}
-}
-
 namespace {
 	size_t myStrlen(const char* str) {
 		if (str == nullptr) {
@@ -206,6 +94,114 @@ namespace {
 	}
 }
 
+MarkdownTable::MarkdownTable(){
+	numberOfRows = 0;
+	numberOfColumns = 0;
+
+	for (int i = 0; i < numberOfColumns; i++) {
+		alignments[i] = Alignment::left;
+	}
+}
+
+MarkdownTable::MarkdownTable(const TableRow* rows, size_t numberOfRows) {
+	setRows(rows, numberOfRows);
+}
+
+MarkdownTable::MarkdownTable(const char** rows, size_t numberOfRows) {
+	setRows(rows, numberOfRows);
+}
+
+MarkdownTable::MarkdownTable(const char* fileName) {
+	loadFromFile(fileName);
+}
+
+const TableRow* MarkdownTable::getRows() const {
+	return rows;
+}
+
+const size_t MarkdownTable::getNumberOfRows() const {
+	return numberOfRows;
+}
+
+const size_t MarkdownTable::getNumberOfColumns() const {
+	return numberOfColumns;
+}
+
+void MarkdownTable::setColumnNames(TableRow columnNames) {
+	// If the number of columns in the table doesn't match the number of 
+	// columns of the given value, return. 
+	if (columnNames.getNumberOfCells() != this->numberOfColumns) {
+		return;
+	}
+
+	// The table row containing the column names is rows[0]
+	for (int i = 0; i < this->numberOfColumns; i++) {
+		this->rows[0].setCellAtIndex(columnNames.getCellAtIndex(i), i);
+	}
+}
+
+void MarkdownTable::setColumnNames(const char* columnNames) {
+	// Create new row from the column names 
+	TableRow r(columnNames);
+
+	if (r.getNumberOfCells() != this->numberOfColumns) {
+		return;
+	}
+
+	for (int i = 0; i < this->numberOfColumns; i++) {
+		this->rows[0].setCellAtIndex(r.getCellAtIndex(i), i);
+	}
+}
+
+void MarkdownTable::setRows(const TableRow* rows, size_t numberOfRows) {
+	if (!rowsAreValid(rows, numberOfRows)) {
+		return;
+	}
+
+	setNumberOfRows(numberOfRows);
+	setNumberOfColumns(rows[0].getNumberOfCells());
+
+	for (int i = 0; i < this->numberOfRows; i++) {
+		this->rows[i].setCells(rows[i].getCells(), this->numberOfColumns);
+	}
+
+	initAlignments();
+}
+
+void MarkdownTable::setRows(const char** rows, size_t numberOfRows) {
+	// Create an array of table rows using the TableRow(char* ) constructor 
+	TableRow* arr = new TableRow[numberOfRows];
+	for (int i = 0; i < numberOfRows; i++) {
+		arr[i] = TableRow(rows[i]);
+	}
+
+	if (!rowsAreValid(arr, numberOfRows)) {
+		return;
+	}
+
+	setNumberOfRows(numberOfRows);
+	setNumberOfColumns(arr[0].getNumberOfCells());
+
+	for (int i = 0; i < numberOfRows; i++) {
+		this->rows[i].setCells(arr[i].getCells(), this->numberOfColumns);
+	}
+
+	initAlignments();
+	delete[] arr;
+}
+
+void MarkdownTable::setNumberOfRows(size_t numberOfRows) {
+	if (numberOfRows <= MAX_NUMBER_OF_ROWS) {
+		this->numberOfRows = numberOfRows;
+	}
+}
+
+void MarkdownTable::setNumberOfColumns(size_t numberOfColumns) {
+	if (numberOfColumns <= MAX_NUMBER_OF_COLS) {
+		this->numberOfColumns = numberOfColumns;
+	}
+}
+
 size_t* MarkdownTable::calculateColumnWidths() const{
 	size_t* columnWidths = new size_t[numberOfColumns];
 
@@ -216,7 +212,7 @@ size_t* MarkdownTable::calculateColumnWidths() const{
 	return columnWidths;
 }
 
-void MarkdownTable::print() const {
+void MarkdownTable::printInfo() const {
 	size_t* columnWidths = calculateColumnWidths();
 
 	rows[0].printCells(alignments, columnWidths);

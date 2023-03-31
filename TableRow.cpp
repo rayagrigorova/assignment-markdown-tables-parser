@@ -4,29 +4,7 @@
 
 #include "TableRow.h"
 
-TableRow::TableRow(){
-	numberOfCells = 0;
-
-	for (int i = 0; i < MAX_NUMBER_OF_COLS; i++) {
-		cells[i].setValue(DEFAULT_VAL);
-	}
-}
-
-TableRow::TableRow(const TableCell* cells, size_t numberOfCells) {
-	setNumberOfCells(numberOfCells);
-	setCells(cells, this->numberOfCells);
-}
-
-TableRow::TableRow(const char* cells) {
-	setCells(cells);
-}
-
-TableRow::~TableRow() {
-
-}
-
 namespace {
-
 	size_t countCharacterOccurances(const char* str, char ch) {
 		if (str == nullptr) {
 			return 0;
@@ -64,6 +42,15 @@ namespace {
 		file.seekg(currentPos);
 		return ctr;
 	}
+}
+
+TableRow::TableRow(const TableCell* cells, size_t numberOfCells) {
+	setNumberOfCells(numberOfCells);
+	setCells(cells, this->numberOfCells);
+}
+
+TableRow::TableRow(const char* cells) {
+	setCells(cells);
 }
 
 void TableRow::setNumberOfCells(size_t numberOfCells) {
@@ -112,7 +99,7 @@ const TableCell* TableRow::getCells() const {
 }
 
 bool TableRow::setCellAtIndex(const TableCell& cell, size_t index) {
-	if (index >= numberOfCells) {
+	if (index < 0 || index >= numberOfCells) {
 		return false;
 	}
 	return cells[index].setValue(cell.getValue());

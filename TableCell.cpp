@@ -2,18 +2,6 @@
 
 #include "TableCell.h"
 
-TableCell::TableCell() : TableCell(DEFAULT_VAL) {
-
-}
-
-TableCell::TableCell(const char* value) {
-	setValue(value);
-}
-
-TableCell::~TableCell() {
-
-}
-
 namespace {
 	size_t myStrlen(const char* str) {
 		if (str == nullptr) {
@@ -49,6 +37,14 @@ namespace {
 			os << symbol;
 		}
 	}
+}
+
+TableCell::TableCell() : TableCell(DEFAULT_VAL) {
+
+}
+
+TableCell::TableCell(const char* value) {
+	setValue(value);
 }
 
 bool TableCell::setValue(const char* value) {
