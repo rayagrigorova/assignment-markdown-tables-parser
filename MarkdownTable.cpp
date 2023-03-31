@@ -235,6 +235,7 @@ void MarkdownTable::selectPrint(const char* value, const char* columnName) const
 	for (int i = 0; i < numberOfRows; i++) {
 		if (stringsAreEqual(value, rows[i].getCellAtIndex(columnIndex).getValue())) {
 			rows[i].printCells(alignments, columnWidths);
+			std::cout << "\n";
 		}
 	}
 
