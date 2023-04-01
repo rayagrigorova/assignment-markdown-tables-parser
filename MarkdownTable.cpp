@@ -281,6 +281,9 @@ bool MarkdownTable::addRow(const char* row) {
 bool MarkdownTable::changeRow(size_t rowNumber, const char* columnName, const char* newValue) {
 	// The first 2 rows of the table don't contain values
 	rowNumber++;
+	if (rowNumber >= numberOfRows) {
+		return false;
+	}
 
 	int columnIndex = findColumnIndex(columnName, 0);
 	if (columnIndex < 0) {
@@ -344,12 +347,14 @@ bool MarkdownTable::loadFromFile(const char* fileName) {
 
 	for (size_t i = 0; i < this->numberOfRows; i++) {
 		if (!rows[i].readCellsFromStream(file)) {
+			setNumberOfRows(0);
 			file.close();
 			return false;
 		}
 	}
 	
 	if (!rowsAreValid(this->rows, numberOfRows)) {
+		setNumberOfRows(0);
 		file.close();
 		return false;
 	}

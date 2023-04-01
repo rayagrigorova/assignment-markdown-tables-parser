@@ -3,6 +3,11 @@
 const char DEFAULT_VAL[] = "Unknown";
 const int MAX_NUMBER_OF_SYMBOLS = 20;
 
+const char HYPHEN = '-';
+const char PIPE = '|';
+const char COLON = ':';
+const char SPACE = ' ';
+
 enum class Alignment {
 	center,
 	left,

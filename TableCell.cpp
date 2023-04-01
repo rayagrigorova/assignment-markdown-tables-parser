@@ -2,11 +2,6 @@
 
 #include "TableCell.h"
 
-const char HYPHEN = '-';
-const char PIPE = '|';
-const char COLON = ':';
-const char SPACE = ' ';
-
 namespace {
 	size_t myStrlen(const char* str) {
 		if (str == nullptr) {
@@ -18,7 +13,6 @@ namespace {
 			ctr++;
 			str++;
 		}
-
 		return ctr;
 	}
 
@@ -54,7 +48,7 @@ TableCell::TableCell(const char* value) {
 
 bool TableCell::setValue(const char* value) {
 	//If the new value is invalid, set this->value to "Unknown"
-	if (myStrlen(value) > MAX_NUMBER_OF_SYMBOLS || value == nullptr) {
+	if (value == nullptr || myStrlen(value) > MAX_NUMBER_OF_SYMBOLS) {
 		myStrcpy(this->value, DEFAULT_VAL);
 		return false;
 	}

@@ -3,7 +3,7 @@
 #include "MarkdownTableParser.h"
 
 #include "Commands.h"
-#include "ErrorMessages.h"
+#include "Messages.h"
 
 namespace {
 	bool stringsAreEqual(const char* str1, const char* str2) {
@@ -23,9 +23,9 @@ namespace {
 	}
 
 	// This function returns the number of times a string contains a character. 
-	int countCharOccurances(const char* str, char ch) {
+	size_t countCharOccurances(const char* str, char ch) {
 		if (str == nullptr) {
-			return -1;
+			return 0;
 		}
 
 		int ctr = 0;
@@ -40,7 +40,7 @@ namespace {
 	}
 }
 
-MarkdownTableParser::MarkdownTableParser(const MarkdownTable& table) : table(table.getRows(), table.getNumberOfRows()) {
+MarkdownTableParser::MarkdownTableParser(const MarkdownTable& table) : table(table) {
 
 }
 
@@ -70,7 +70,7 @@ void MarkdownTableParser::interface() {
 		return;
 	}
 	
-	//This loop will be exited after the table is saved to a file.
+	//The loop will be exited after the table is saved to a file.
 	bool isSaved = false;
 
 	while (!isSaved) {
@@ -79,31 +79,23 @@ void MarkdownTableParser::interface() {
 		std::cin >> buff;
 		std::cin.ignore();
 
-		for (int i = 0; i < NUMBER_OF_COMMANDS; i++) {
+		int i = 0;
+		for (; i < NUMBER_OF_COMMANDS; i++) {
 			if (stringsAreEqual(ALL_COMMANDS[i], buff)) {
 				switch (i) {
-				case 0:
-					printInfo();
-					break;
-				case 1:
-					change();
-					break;
-				case 2:
-					changeRow();
-					break;
-				case 3:
-					addRow();
-					break;
-				case 4:
-					selectPrint();
-					break;
-				case 5:
-					isSaved = save();
-					break;
-				default:
-					std::cout << INVALID_OPERATION_MSG << "\n";
+				case 0: print(); break;
+				case 1: change(); break;
+				case 2: changeRow(); break;
+				case 3: addRow(); break;
+				case 4: selectPrint(); break;
+				case 5: isSaved = save(); break;
+				default: std::cout << INVALID_OPERATION_MSG << "\n";
 				}
+				break;
 			}
+		}
+		if (i >= NUMBER_OF_COMMANDS) {
+			std::cout << INVALID_OPERATION_MSG << "\n";
 		}
 	}
 }
@@ -120,7 +112,6 @@ void MarkdownTableParser::change() {
 	std::cin.getline(buff, MAX_INPUT_SIZE + 1);
 
 	int numberOfSpaces = countCharOccurances(buff, ' ');
-
 	bool operationWasSuccessful = false;
 
 	// Change the name of a column
@@ -131,12 +122,13 @@ void MarkdownTableParser::change() {
 	// Change the first matching value in a column with a given value
 	else if (numberOfSpaces == 1){
 		char* ptr = buff;
-		size_t pos = 0;
+		size_t spaceFoundPos = 0;
 
-		for (; *(ptr) != ' '; pos++, ptr++);
-
+		for (; *(ptr) != SPACE; spaceFoundPos++, ptr++);
+		// Write over the found space 
 		*ptr = '\0';
-		operationWasSuccessful = table.changeCell(ptr - pos, ptr + 1, columnName);
+
+		operationWasSuccessful = table.changeCell(ptr - spaceFoundPos, ptr + 1, columnName);
 	}
 
 	if (operationWasSuccessful) {
@@ -152,8 +144,8 @@ void MarkdownTableParser::changeRow() {
 	size_t rowNumber;
 	std::cin >> rowNumber;
 
-	char columnName[MAX_NUMBER_OF_SYMBOLS + 1];
-	char newValue[MAX_NUMBER_OF_SYMBOLS + 1];
+	char columnName[MAX_INPUT_SIZE + 1];
+	char newValue[MAX_INPUT_SIZE + 1];
 
 	std::cin >> columnName >> newValue;
 	std::cin.ignore();
@@ -168,8 +160,6 @@ void MarkdownTableParser::changeRow() {
 }
 
 void MarkdownTableParser::addRow() {
-	// The number of cells in the row is equal to the
-	// number of columns in the table
 	size_t numberOfCells = table.getNumberOfColumns(); 
 	size_t numberOfSymbols = (MAX_NUMBER_OF_SYMBOLS + 1) * numberOfCells;
 
@@ -204,6 +194,6 @@ bool MarkdownTableParser::save() const{
 	return table.saveToFile(fileName);
 }
 
-void MarkdownTableParser::printInfo() const {
-	table.printInfo();
+void MarkdownTableParser::print() const {
+	table.print();
 }

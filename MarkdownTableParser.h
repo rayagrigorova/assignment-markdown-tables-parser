@@ -18,6 +18,5 @@ public:
 	void addRow();
 	void selectPrint() const;
 	bool save() const;
-	void printInfo() const;
-
+	void print() const;
 };
