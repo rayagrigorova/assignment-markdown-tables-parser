@@ -8,29 +8,26 @@ class MarkdownTable {
 private:
 	TableRow rows[MAX_NUMBER_OF_ROWS];
 
-	size_t numberOfRows;  // The actual number of rows and columns in the table
-	size_t numberOfColumns;
+	size_t numberOfRows = 0;  // The actual number of rows and columns in the table
+	size_t numberOfColumns = 0;
 
 	// Each column has an alignment 
 	Alignment alignments[MAX_NUMBER_OF_COLS];
 
-	// A helper function
-	// Find the column of a cell using its value and row index
+	// A helper function - find the index of a cell using its value and row index
 	int findColumnIndex(const char* value, const size_t rowInd) const;
 
 	// Using the second row of the table, determine the alignments of all columns 
 	void initAlignments();
 
-	// Needed for printing - the longest value in a column 
-	// determines the width of the column. 
+	// Needed for printing - the longest value in a column determines the width of the column. 
 	size_t getLongestValueLength(size_t columnIndex) const; 
 
 	// Find the alignment of a given column (the row containing information about alignment is rows[1])
 	// This function is used in initAlignments(). 
 	const Alignment identifyAlignment(size_t columnIndex) const;
 
-	// Create an array containg the widths of the table columns
-	// Used in printing/writing functions.
+	// Create an array containg the widths of the table columns. Used in printing/writing functions.
 	size_t* calculateColumnWidths() const;
 
 	// A seperate function to print the second row. 
@@ -49,7 +46,7 @@ public:
 	const size_t getNumberOfColumns() const;
 	const TableRow& getRowAtIndex(size_t index) const;
 
-	// Set the first row of the table
+	// Set the first row of the table containing the column names
 	void setColumnNames(TableRow columnNames);
 	void setColumnNames(const char* columnNames);
 
@@ -58,7 +55,7 @@ public:
 	void setNumberOfRows(size_t numberOfRows);
 	void setNumberOfColumns(size_t numberOfColumns);
 
-	void printInfo() const;
+	void print() const;
 	void selectPrint(const char* value, const char* columnName) const;
 
 	bool changeColumnName(const char* oldName, const char* newName);
