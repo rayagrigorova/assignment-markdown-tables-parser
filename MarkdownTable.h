@@ -8,7 +8,8 @@ class MarkdownTable {
 private:
 	TableRow rows[MAX_NUMBER_OF_ROWS];
 
-	size_t numberOfRows = 0;  // The actual number of rows and columns in the table
+	// The actual number of rows and columns in the table
+	size_t numberOfRows = 0; 
 	size_t numberOfColumns = 0;
 
 	// Each column has an alignment 
@@ -47,7 +48,7 @@ public:
 	const TableRow& getRowAtIndex(size_t index) const;
 
 	// Set the first row of the table containing the column names
-	void setColumnNames(TableRow columnNames);
+	void setColumnNames(const TableRow& columnNames);
 	void setColumnNames(const char* columnNames);
 
 	void setRows(const TableRow* rows, size_t numberOfRows);

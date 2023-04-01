@@ -38,8 +38,8 @@ namespace {
 	}
 }
 
-TableCell::TableCell() : TableCell(DEFAULT_VAL) {
-
+TableCell::TableCell() {
+	myStrcpy(this->value, DEFAULT_VAL);
 }
 
 TableCell::TableCell(const char* value) {
@@ -64,7 +64,7 @@ const char* TableCell::getValue() const {
 }
 
 size_t TableCell::getValueLength() const {
-	return myStrlen(getValue());
+	return myStrlen(value);
 }
 
 // Index is the number of the cell's column 

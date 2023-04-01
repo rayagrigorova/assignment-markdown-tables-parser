@@ -53,6 +53,10 @@ namespace {
 	}
 
 	size_t countCharacterOccurancesInFile(std::ifstream& file, char ch) {
+		if (!file.is_open()) {
+			return 0;
+		}
+
 		// Save position
 		size_t currentPos = file.tellg();
 		// Move the get pointer to the beginning of the file
@@ -124,7 +128,7 @@ const size_t MarkdownTable::getNumberOfColumns() const {
 	return numberOfColumns;
 }
 
-void MarkdownTable::setColumnNames(TableRow columnNames) {
+void MarkdownTable::setColumnNames(const TableRow& columnNames) {
 	// If the number of columns in the table doesn't match the number of 
 	// columns of the given row, return. 
 	if (columnNames.getNumberOfCells() != this->numberOfColumns) {
@@ -142,16 +146,7 @@ void MarkdownTable::setColumnNames(TableRow columnNames) {
 void MarkdownTable::setColumnNames(const char* columnNames) {
 	// Create new row from the column names 
 	TableRow r(columnNames);
-
-	if (r.getNumberOfCells() != this->numberOfColumns) {
-		return;
-	}
-
-	for (int i = 0; i < this->numberOfColumns; i++) {
-		this->rows[0].setCellAtIndex(r.getCellAtIndex(i), i);
-	}
-
-	initAlignments();
+	setColumnNames(r);
 }
 
 void MarkdownTable::setRows(const TableRow* rows, size_t numberOfRows) {
@@ -176,19 +171,7 @@ void MarkdownTable::setRows(const char** rows, size_t numberOfRows) {
 		arr[i] = TableRow(rows[i]);
 	}
 
-	if (!rowsAreValid(arr, numberOfRows)) {
-		delete[] arr;
-		return;
-	}
-
-	setNumberOfRows(numberOfRows);
-	setNumberOfColumns(arr[0].getNumberOfCells());
-
-	for (int i = 0; i < numberOfRows; i++) {
-		this->rows[i] = arr[i];
-	}
-
-	initAlignments();
+	setRows(arr, numberOfRows);
 	delete[] arr;
 }
 
@@ -240,7 +223,6 @@ void MarkdownTable::selectPrint(const char* value, const char* columnName) const
 			std::cout << "\n";
 		}
 	}
-
 	delete[] columnWidths;
 }
 
@@ -257,7 +239,7 @@ bool MarkdownTable::changeColumnName(const char* oldName, const char* newName) {
 }
 
 bool MarkdownTable::addRow(const TableRow& row) {
-	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
+	if (numberOfRows >= MAX_NUMBER_OF_ROWS || row.getNumberOfCells() != numberOfColumns) {
 		return false;
 	}
 	rows[numberOfRows++] = row;
@@ -265,17 +247,8 @@ bool MarkdownTable::addRow(const TableRow& row) {
 }
 
 bool MarkdownTable::addRow(const char* row) {
-	if (numberOfRows >= MAX_NUMBER_OF_ROWS) {
-		return false;
-	}
-
 	TableRow r(row);
-	if (r.getNumberOfCells() == numberOfColumns) {
-		rows[numberOfRows++] = r;
-		return true;
-	}
-
-	return false;
+	return addRow(r);
 }
 
 bool MarkdownTable::changeRow(size_t rowNumber, const char* columnName, const char* newValue) {
@@ -312,6 +285,7 @@ bool MarkdownTable::changeCell(const char* oldValue, const char* newValue, const
 
 bool MarkdownTable::saveToFile(const char* fileName) const {
 	std::ofstream file(fileName);
+
 	if (!file.is_open()) {
 		return false;
 	}
@@ -384,7 +358,7 @@ void MarkdownTable::initAlignments() {
 
 // Get the length of the longest value in a column to determine the column width
 size_t MarkdownTable::getLongestValueLength(size_t columnIndex) const{
-	if (numberOfRows == 0) {
+	if (numberOfRows == 0 || columnIndex >= numberOfColumns) {
 		return 0;
 	}
 
@@ -432,7 +406,7 @@ const Alignment MarkdownTable::identifyAlignment(size_t columnIndex) const{
 
 	foundInd = findSymbolInString(str, COLON);
 
-	// A second ':' symbol wasn't found. 
+	// Only one ':' symbol was found. 
 	if (foundInd < 0) {
 		if (!hasLeftAlignment) {
 			return Alignment::right;

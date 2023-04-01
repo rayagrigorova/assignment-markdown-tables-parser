@@ -3,7 +3,6 @@
 #include "MarkdownTable.h"
 
 class MarkdownTableParser {
-
 private:
 	MarkdownTable table;
 

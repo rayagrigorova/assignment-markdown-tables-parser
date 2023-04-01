@@ -21,9 +21,13 @@ namespace {
 	}
 
 	size_t countCharacterOccurancesInFileLine(std::ifstream& file, char ch) {
+		if (!file.is_open()) {
+			return 0;
+		}
+
 		size_t currentPos = file.tellg();
 
-		char current = '\0';
+		char current = ' ';
 		size_t ctr = 0;
 
 		while (current != '\n') {
