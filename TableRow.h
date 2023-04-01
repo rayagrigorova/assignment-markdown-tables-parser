@@ -14,7 +14,7 @@ public:
 	TableRow() = default;
 	TableRow(const TableCell* cells, size_t numberOfCells);
 	TableRow(const char* cells); /* This constructor may be easier to use because it
-					                does't require creating a TableValue array*/
+					                does't require creating a TableCell array*/
 
 	void setNumberOfCells(size_t numberOfCells);
 	void setCells(const TableCell* cells, size_t numberOfCells);

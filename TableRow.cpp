@@ -55,14 +55,13 @@ TableRow::TableRow(const char* cells) {
 
 void TableRow::setNumberOfCells(size_t numberOfCells) {
 	if (numberOfCells > MAX_NUMBER_OF_COLS) {
-		this->numberOfCells = 0;
 		return;
 	}
 	this->numberOfCells = numberOfCells;
 }
 
 void TableRow::setCells(const char* cells) {
-	size_t count = countCharacterOccurances(cells, ' ') + 1;
+	size_t count = countCharacterOccurances(cells, SPACE) + 1;
 
 	setNumberOfCells(count);
 	if (this->numberOfCells == 0) {
@@ -72,8 +71,8 @@ void TableRow::setCells(const char* cells) {
 	std::stringstream ss(cells);
 	char buff[MAX_NUMBER_OF_SYMBOLS + 1];
 
+	// Get each of the cells from the string stream
 	for (int i = 0; i < this->numberOfCells - 1; i++) {
-		// Get each of the cells from the string stream
 		ss.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, ' ');
 		this->cells[i].setValue(buff);
 	}
@@ -99,7 +98,7 @@ const TableCell* TableRow::getCells() const {
 }
 
 bool TableRow::setCellAtIndex(const TableCell& cell, size_t index) {
-	if (index < 0 || index >= numberOfCells) {
+	if (index >= numberOfCells) {
 		return false;
 	}
 	return cells[index].setValue(cell.getValue());
@@ -126,7 +125,6 @@ bool TableRow::readCellsFromStream(std::ifstream& ifs){
 
 	// Each line in the file is one row in the table
 	size_t numberOfValuesInLine = countCharacterOccurancesInFileLine(ifs, PIPE) - 1;
-
 	setNumberOfCells(numberOfValuesInLine);
 
 	char buff[MAX_NUMBER_OF_SYMBOLS + 1];
@@ -135,11 +133,12 @@ bool TableRow::readCellsFromStream(std::ifstream& ifs){
 	ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
 
 	for (int i = 0; !ifs.eof() && i < this->numberOfCells; i++) {
-		//Get all symbols up to '|'
+		//Get all symbols up to '|' (without whitespaces)
 		ifs >> buff;
-		//ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
+		if (!cells[i].setValue(buff)) {
+			return false;
+		}
 
-		cells[i].setValue(buff);
 		ifs.getline(buff, MAX_NUMBER_OF_SYMBOLS + 1, PIPE);
 	}
 	
