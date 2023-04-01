@@ -9,11 +9,6 @@ enum class Alignment {
 	right
 };
 
-const char HYPHEN = '-';
-const char PIPE = '|';
-const char COLON = ':';
-const char SPACE = ' ';
-
 class TableCell {
 private:
 	char value[MAX_NUMBER_OF_SYMBOLS + 1];
