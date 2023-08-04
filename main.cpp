@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <fstream>
 
-#include "MarkdownTableParser.h"
+#include "TableParser/MarkdownTableParser.h"
 
 int main()
 {
